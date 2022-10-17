@@ -12,45 +12,26 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class TestController extends AbstractController
 {
+    private AnnuaireManager $annuaireManager;
 
+    /**
+     * Constructeur
+     * Injection de AnnuaireManager
+     */
+    public function __construct(AnnuaireManager $annuaireManager) {
+        $this->annuaireManager = $annuaireManager;
+    }
+
+    /**
+     * Fonction index
+     */
     #[Route('/test', name: 'app_test')]
-    public function index(AnnuaireManager $annuaire, ConnectLdapService $connectLdapService): Response
+    public function index(): Response
     {
-        // Initialiser les variables
-        $host = $connectLdapService->getHost();
-        $port = $connectLdapService->getPort();
-        $dn = $connectLdapService->getDn();
-        $password = $connectLdapService->getPassword();
-        $person = "TAGLIAFERRO";
-        $uri = "ldap://".$host.":".$port;
-        $base = "ou=people,ou=GHT,o=AASTRA,dc=DOMAIN,dc=COM";
-        $filter = "sn=TAGLIAFERRO";
-        $justThese = array("sn");
+        $sn = "TAGLIAFERRO";
+        $tableauTest = $this->annuaireManager->findByName($sn);
 
-        // Se connecter au ldap
-        // $ldap = Ldap::create('ext_ldap', [
-        //     'host' => $host,
-        //     'encryption' => 'none',
-        // ]);
-        // $ldap = Ldap::create('ext_ldap', ['connection_string' => 'ldaps://' . $host . ':' . $port]);
-        // $ldap->bind($dn, $password);
-
-        // Créer la requête
-        
-        // $query = $ldap->query($base, $filters);
-        // $results = $query->execute();
-
-        // dd(ldap_get_entries($ldap, $results));
-
-        $ldapConnect = ldap_connect($uri) or die("That LDAP-URI was not parseable");
-        ldap_set_option($ldapConnect, LDAP_OPT_PROTOCOL_VERSION, 3);
-        ldap_set_option($ldapConnect, LDAP_OPT_REFERRALS, 0);
-        $ldapBind = ldap_bind($ldapConnect,$dn,$password);
-
-        $sr = ldap_search($ldapConnect, $dn, $filter, $justThese);
-        $info = ldap_get_entries($ldapConnect, $sr);
-
-        dd($info);
+        dd($tableauTest);
 
         return $this->json([
             'message' => 'Test des requêtes Ldap',

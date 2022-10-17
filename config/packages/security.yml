@@ -1,0 +1,13 @@
+# security:
+#     # ...
+
+#     providers:
+#         my_ldap:
+#             ldap:
+#                 service: Symfony\Component\Ldap\Ldap
+#                 base_dn: '%env(DN)%'
+#                 search_dn: "cn=read-only-admin,dc=example,dc=com"
+#                 search_password: '%env(PASSWORD)%'
+#                 default_roles: ROLE_USER
+#                 uid_key: uid
+#                 extra_fields: ['email']

@@ -19,28 +19,56 @@ class TestCommand extends Command
 {
     private $annuaire;
 
-    public function __construct()
+    /**
+     * Constructeur
+     * Injection de AnnuaireManager
+     */
+    public function __construct(AnnuaireManager $annuaireManager)
     {
-        $this->annuaire = new AnnuaireManager();
+        $this->annuaire = $annuaireManager;
+        parent::__construct();
     }
 
-    // protected function configure(): void
-    // {
-    //     $this
-    //         // configure an argument
-    //         ->addArgument('username', InputArgument::REQUIRED, 'The username of the user')
-    //         // ...
-    //         ;
-    // }
+    /**
+     * Configuration
+     * Ajout d'arguments
+     */
+    protected function configure(): void
+    {
+        $this
+            // configure an argument
+            ->addArgument('username', InputArgument::REQUIRED, 'The username of the user')
+            // ...
+            ;
+    }
 
+    /**
+     * Execute 
+     * Retourne le numéro et si il est privé ou public
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $output->writeln([
-            $this->annuaire->callAnnuaire(),
-        ]);
+        $sn = $input->getArgument('username');
+        $sortie = $this->annuaire->findByName($sn);
 
-        // retrieve the argument value using getArgument()
-        // $output->writeln('Username : ' . $input->getArgument('username'));
+        if (count($sortie) > 1) {
+            $output->writeln([
+                "----------",
+                "Prénom : " . $sortie[0],
+                "Nom : " . $sortie[1],
+                "Numéro court : " . $sortie[2],
+                "Numéro long : " . $sortie[3],
+                "Email : " . $sortie[4],
+                "Pôle : " . $sortie[5],
+                "Métier : " . $sortie[6],
+                "Poste : " . $sortie[7],
+                "----------",
+            ]);
+        } else {
+            $output->writeln([
+                $sortie[0],
+            ]);
+        }
 
         return Command::SUCCESS;
     }
