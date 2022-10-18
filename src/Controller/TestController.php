@@ -28,14 +28,26 @@ class TestController extends AbstractController
     #[Route('/test', name: 'app_test')]
     public function index(): Response
     {
-        $sn = "TAGLIAFERRO";
-        $tableauTest = $this->annuaireManager->findByName($sn);
+        $sn = "PLOUHINEC";
+        $tableauResultats = $this->annuaireManager->findPeopleByName($sn);
+        dd($tableauResultats);
+        for ($i=0; $i < count($tableauResultats); $i++) { 
+            return $this->json([
+                'Description' => 'Test des requêtes Ldap',
+                'Requête' => 'Récupérer infos depuis le nom ' . $sn . '',
+                'résultats' => [
+                    'Prénom' => $tableauResultats[$i]->getPrenom(),
+                    'Nom' => $tableauResultats[$i]->getNom(),
+                    'Numéro court' => $tableauResultats[$i]->getNumeroCourt(),
+                    'Numéro long' => $tableauResultats[$i]->getNumeroLong(),
+                    'Mail' => $tableauResultats[$i]->getMail(),
+                    'Pôle' => $tableauResultats[$i]->getPole(),
+                    'Métier' => $tableauResultats[$i]->getMetier(),
+                    'Poste' => $tableauResultats[$i]->getPoste(),
+                ],
+            ]);
+        }
 
-        dd($tableauTest);
-
-        return $this->json([
-            'message' => 'Test des requêtes Ldap',
-            'path' => 'src/Controller/TestController.php',
-        ]);
+        
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Model\People;
 use App\Service\ConnectLdapService;
 
 class AnnuaireManager
@@ -20,6 +21,7 @@ class AnnuaireManager
 
     /**
      * Tester une requête sur l'annuaire méthode Symfony
+     * Ne fonctionne pas
      */
     public function testAnnuaireSymfony()
     {
@@ -37,7 +39,7 @@ class AnnuaireManager
     /**
      * Trouver les infos d'une personne par son nom
      */
-    public function findByName($sn)
+    public function findPeopleByName($sn)
     {
         // Connexion au Ldap
         $ldap = $this->connectLdapService->connexionLdapPHP();
@@ -48,51 +50,47 @@ class AnnuaireManager
         // Envoi de la requête
         $query = ldap_search($ldap, $this->baseLdap, $filter, $justThese);
 
-        // Récupération des entrées
+        // Récupération des réponses de la requête
         $info = ldap_get_entries($ldap, $query);
 
         // Si la personne existe
-        if(count($info) > 1) {
+        if(count($info) > 0) {
+            // Création d'un tableau vide
+            $entitiesTab = array();
             for ($i=0; $i < count($info); $i++) { 
-                
-            }
-            // Vérifier si ce n'est pas un numéro de chambre
-            if ($info[0]['hierarchysv'] != 'PATIENTS/CHIC') {
-                // Récupération du prénom
-                $prenom = $info[0]['givenname'][0];
-                // Récupération du nom
-                $nom = $info[0]['sn'][0];
-                // Récupération du numéro court
-                $numero = $info[0]['telephonenumber'][0];
-                // récupération du numéro long
-                $numeroLong = $info[0]['didnumbers'][0];
-                // Récupération du mail
-                $mail = $info[0]['mail'][0];
-                // Récupération du pôle
-                $pole = $info[0]['attr1'][0];
-                // récupération du métier
-                $metier = $info[0]['attr7'][0];
-                // Récupération du poste
-                $poste =$info[0]['attr3'][0];
-
-                // Recherche si le numéro est public ou non
-                $filter2 = '(&(objectClass=numberRecord)(phoneNumber=' . $numero .'))';
-                $query2 = ldap_search($ldap, $this->baseLdap, $filter2, $justThese);
-                $reponse2 = ldap_get_entries($ldap, $query2) or die ("Error in get entries: ".ldap_error($ldap));
-                if ($reponse2[0]['private'][0] == "LV") {
-                    $numero = $numero;
-                } else {
-                    $numero = "Numéro privé";
-                }
-
-                $reponses = array($prenom, $nom, $numero, $numeroLong, $mail, $pole, $metier, $poste);
-                return $reponses;
-            } else {
-                return array("Informations interdites");
+                // Vérifier si ce n'est pas un numéro de chambre
+                if (isset($info[$i]['hierarchysv'])) {
+                    if ($info[$i]['hierarchysv'] != 'PATIENTS/CHIC') {
+                        if (isset($info[$i]['givenname'][0])) {
+                            $entitiesTab[$i] = new People(
+                                $info[$i]['givenname'][0],
+                                $info[$i]['sn'][0],
+                                $info[$i]['telephonenumber'][0],
+                                $info[$i]['didnumbers'][0],
+                                $info[$i]['mail'][0],
+                                $info[$i]['attr1'][0],
+                                $info[$i]['attr7'][0],
+                                $info[$i]['attr3'][0],
+                            );
+                            
+                            // Recherche si le numéro est public ou non
+                            $filter2 = '(&(objectClass=numberRecord)(phoneNumber=' . $entitiesTab[$i]->getNumeroCourt() .'))';
+                            $query2 = ldap_search($ldap, $this->baseLdap, $filter2, $justThese);
+                            $reponse2 = ldap_get_entries($ldap, $query2);
+                            if ($reponse2[0]['private'][0] == "LV") {
+                                $entitiesTab[$i]->setNumeroCourt($entitiesTab[$i]->getNumeroCourt());
+                            } else {
+                                $entitiesTab[$i]->setNumeroCourt("Numéro privé");
+                            }
+                        }
+                    } else {
+                        continue;
+                    }
+                } 
             }
         } else {
             return array ("Personne inconnue");
         }
-
+        return $entitiesTab;
     }
 }

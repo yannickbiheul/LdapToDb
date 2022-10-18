@@ -52,18 +52,21 @@ class TestCommand extends Command
         $sortie = $this->annuaire->findByName($sn);
 
         if (count($sortie) > 1) {
-            $output->writeln([
-                "----------",
-                "Prénom : " . $sortie[0],
-                "Nom : " . $sortie[1],
-                "Numéro court : " . $sortie[2],
-                "Numéro long : " . $sortie[3],
-                "Email : " . $sortie[4],
-                "Pôle : " . $sortie[5],
-                "Métier : " . $sortie[6],
-                "Poste : " . $sortie[7],
-                "----------",
-            ]);
+            for ($i=0; $i < count($sortie); $i++) { 
+                $output->writeln([
+                    "----------",
+                    "Prénom : " . $sortie[$i]->prenom,
+                    "Nom : " . $sortie[$i]->nom,
+                    "Numéro court : " . $sortie[$i]->numeroCourt,
+                    "Numéro long : " . $sortie[$i]->numeroLong,
+                    "Email : " . $sortie[$i]->mail,
+                    "Pôle : " . $sortie[$i]->pole,
+                    "Métier : " . $sortie[$i]->metier,
+                    "Poste : " . $sortie[$i]->poste,
+                    "----------",
+                ]);
+            }
+            
         } else {
             $output->writeln([
                 $sortie[0],
