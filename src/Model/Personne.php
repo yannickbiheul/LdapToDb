@@ -2,7 +2,7 @@
 
 namespace App\Model;
 
-class People
+class Personne
 {
     protected $prenom;
     protected $nom;
@@ -14,14 +14,14 @@ class People
     protected $poste;
 
     public function __construct($prenom, $nom, $numeroCourt, $numeroLong, $mail, $pole, $metier, $poste) {
-        $this->prenom = $prenom;
-        $this->nom = $nom;
-        $this->numeroCourt = $numeroCourt;
-        $this->numeroLong = $numeroLong;
-        $this->mail = $mail;
-        $this->pole = $pole;
-        $this->metier = $metier;
-        $this->poste = $poste;
+        $this->setPrenom($prenom);
+        $this->setNom($nom);
+        $this->setNumeroCourt($numeroCourt);
+        $this->setNumeroLong($numeroLong);
+        $this->setMail($mail);
+        $this->setPole($pole);
+        $this->setMetier($metier);
+        $this->setPoste($poste);
     }
 
     public function getPrenom() {

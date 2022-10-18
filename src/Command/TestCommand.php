@@ -2,12 +2,12 @@
 
 namespace App\Command;
 
-use App\Service\AnnuaireManager;
-use Symfony\Component\Console\Attribute\AsCommand;
+use App\Service\PersonneManager;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Input\InputArgument;
 
 #[AsCommand(
     name: 'app:test-command',
@@ -17,15 +17,15 @@ use Symfony\Component\Console\Input\InputArgument;
 )]
 class TestCommand extends Command
 {
-    private $annuaire;
+    private $personneManager;
 
     /**
      * Constructeur
-     * Injection de AnnuaireManager
+     * Injection de PersonneManager
      */
-    public function __construct(AnnuaireManager $annuaireManager)
+    public function __construct(PersonneManager $personneManager)
     {
-        $this->annuaire = $annuaireManager;
+        $this->personne = $personneManager;
         parent::__construct();
     }
 
@@ -44,7 +44,7 @@ class TestCommand extends Command
 
     /**
      * Execute 
-     * Retourne le numéro et si il est privé ou public
+     * Retourne les infos d'une personne depuis un nom
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {

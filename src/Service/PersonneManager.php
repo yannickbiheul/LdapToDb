@@ -2,14 +2,14 @@
 
 namespace App\Service;
 
-use App\Model\People;
+use App\Model\Pole;
+use App\Model\Personne;
 use App\Service\ConnectLdapService;
 
-class AnnuaireManager
+class PersonneManager
 {
     private $ldap;
     private $connectLdapService;
-    private $baseLdap = "ou=people,ou=GHT,o=AASTRA,dc=DOMAIN,dc=COM";
 
     /**
      * Constructeur
@@ -20,20 +20,30 @@ class AnnuaireManager
     }
 
     /**
-     * Tester une requête sur l'annuaire méthode Symfony
-     * Ne fonctionne pas
+     * Lister tous les pôles
+     * Retourne array Pole
      */
-    public function testAnnuaireSymfony()
+    public function getPoles()
     {
         // Connexion au Ldap
-        $ldap = $this->connectLdapService->connexionLdapSymfony();
-        // Création d'une requête
-        $requete = "&(objectclass=peopleRecord)(attr2=DSIN))";
+        $ldap = $this->connectLdapService->connexionLdap();
+        // Création d'un filtre de requête
+        $filter = 'objectClass=peopleRecord';
+        // Tableau des attributs demandés
+        $justThese = array('sn','attr1');
         // Envoi de la requête
-        $query = $ldap->query($this->baseLdap, $requete);
-        // Retourner la requête sous forme de tableau
-        $results = $query->execute()->toArray();
-        return $results;
+        $query = ldap_search($ldap, $this->connectLdapService->getBasePeople(), $filter, $justThese);
+        // Récupération des réponses de la requête
+        $infos = ldap_get_entries($ldap, $query);
+
+        $poles = array();
+        for ($i=0; $i < count($infos); $i++) { 
+            if (isset($infos[$i]['attr1'])) {
+                $poles[$i] = new Pole($infos[$i]['attr1'][0]);
+            } 
+        }
+
+        return array_unique($poles);
     }
 
     /**
@@ -42,13 +52,13 @@ class AnnuaireManager
     public function findPeopleByName($sn)
     {
         // Connexion au Ldap
-        $ldap = $this->connectLdapService->connexionLdapPHP();
+        $ldap = $this->connectLdapService->connexionLdap();
         // Création d'un filtre de requête
         $filter = '(&(objectClass=peopleRecord)(sn=' . $sn . '))';
         // Tableau des attributs demandés
         $justThese = array('hierarchySV', 'sn', 'givenName', 'telephoneNumber', 'private', 'didNumbers', 'mail', 'attr1', 'attr3', 'attr7');
         // Envoi de la requête
-        $query = ldap_search($ldap, $this->baseLdap, $filter, $justThese);
+        $query = ldap_search($ldap, $this->connectLdapService->getBasePeople(), $filter, $justThese);
 
         // Récupération des réponses de la requête
         $info = ldap_get_entries($ldap, $query);
@@ -62,7 +72,7 @@ class AnnuaireManager
                 if (isset($info[$i]['hierarchysv'])) {
                     if ($info[$i]['hierarchysv'] != 'PATIENTS/CHIC') {
                         if (isset($info[$i]['givenname'][0])) {
-                            $entitiesTab[$i] = new People(
+                            $entitiesTab[$i] = new Personne(
                                 $info[$i]['givenname'][0],
                                 $info[$i]['sn'][0],
                                 $info[$i]['telephonenumber'][0],
@@ -75,7 +85,7 @@ class AnnuaireManager
                             
                             // Recherche si le numéro est public ou non
                             $filter2 = '(&(objectClass=numberRecord)(phoneNumber=' . $entitiesTab[$i]->getNumeroCourt() .'))';
-                            $query2 = ldap_search($ldap, $this->baseLdap, $filter2, $justThese);
+                            $query2 = ldap_search($ldap, $this->connectLdapService->getBasePeople(), $filter2, $justThese);
                             $reponse2 = ldap_get_entries($ldap, $query2);
                             if ($reponse2[0]['private'][0] == "LV") {
                                 $entitiesTab[$i]->setNumeroCourt($entitiesTab[$i]->getNumeroCourt());

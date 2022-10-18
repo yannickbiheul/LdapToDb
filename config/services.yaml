@@ -8,6 +8,8 @@ parameters:
   PASSWORD: '%env(PASSWORD)%'
   HOST: '%env(HOST)%'
   PORT: '%env(PORT)%'
+  BASE_PEOPLE: '%env(BASE_PEOPLE)%'
+  BASE_CONTACT: '%env(BASE_CONTACT)%'
 
 services:
     # default configuration for services in *this* file
@@ -30,6 +32,8 @@ services:
         $password: '%env(PASSWORD)%'
         $host: '%env(HOST)%'
         $port: '%env(PORT)%'
+        $basePeople: '%env(BASE_PEOPLE)%'
+        $baseContact: '%env(BASE_CONTACT)%'
 
     Symfony\Component\Ldap\Ldap:
         arguments: ['@Symfony\Component\Ldap\Adapter\ExtLdap\Adapter']

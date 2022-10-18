@@ -2,8 +2,6 @@
 
 namespace App\Service;
 
-use Symfony\Component\Ldap\Ldap;
-
 class ConnectLdapService
 {
     /**
@@ -14,6 +12,8 @@ class ConnectLdapService
         public string $password, 
         public string $host, 
         public string $port,
+        public string $basePeople,
+        public string $baseContact,
     ) {}
     
     public function getDn(): string
@@ -36,22 +36,19 @@ class ConnectLdapService
         return $this->port;
     }
 
-    /**
-     * Connexion au Serveur Ldap en Symfony. 
-     * Retourne "Ldap\Ldap"
-     */
-    public function connexionLdapSymfony()
-    {
-        $ldapConnect = Ldap::create('ext_ldap', ['connection_string' => 'ldaps://' . $this->getHost() . ':' . $this->getPort()]);
-        $ldapConnect->bind($this->getDn(), $this->getPassword());
-        return $ldapConnect;
+    public function getBasePeople() {
+        return $this->basePeople;
+    }
+
+    public function getBaseContact() {
+        return $this->baseContact;
     }
 
     /**
      * Connexion au serveur Ldap en PHP. 
      * Retourne "Ldap/Connexion"
      */
-    public function connexionLdapPHP()
+    public function connexionLdap()
     {
         $ldapConnect = ldap_connect('ldap://' . $this->getHost() . ':' . $this->getPort()) or die("L'URI n'est pas la bonne !");
         ldap_set_option($ldapConnect, LDAP_OPT_PROTOCOL_VERSION, 3);
