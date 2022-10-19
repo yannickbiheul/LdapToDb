@@ -2,8 +2,7 @@
 
 namespace App\Service;
 
-use App\Model\Pole;
-use App\Model\Personne;
+use App\Entity\Pole;
 use App\Service\ConnectLdapService;
 
 class PoleManager
@@ -23,7 +22,7 @@ class PoleManager
      * Lister tous les pôles
      * Retourne array Pole
      */
-    public function getPoles()
+    public function savePoles()
     {
         // Connexion au Ldap
         $ldap = $this->connectLdapService->connexionLdap();

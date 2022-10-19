@@ -3,6 +3,7 @@
 namespace App\Command;
 
 use App\Service\PersonneManager;
+use App\Service\PoleManager;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
@@ -18,60 +19,35 @@ use Symfony\Component\Console\Output\OutputInterface;
 class TestCommand extends Command
 {
     private $personneManager;
+    private $poleManager;
 
     /**
      * Constructeur
      * Injection de PersonneManager
      */
-    public function __construct(PersonneManager $personneManager)
+    public function __construct(PersonneManager $personneManager, PoleManager $poleManager)
     {
-        $this->personne = $personneManager;
+        $this->personneManager = $personneManager;
+        $this->poleManager = $poleManager;
         parent::__construct();
     }
 
     /**
-     * Configuration
-     * Ajout d'arguments
-     */
-    protected function configure(): void
-    {
-        $this
-            // configure an argument
-            ->addArgument('username', InputArgument::REQUIRED, 'The username of the user')
-            // ...
-            ;
-    }
-
-    /**
-     * Execute 
-     * Retourne les infos d'une personne depuis un nom
+     * Execute : 
+     * Récupère les tables et les envoie à la base de données Drupal
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $sn = $input->getArgument('username');
-        $sortie = $this->annuaire->findByName($sn);
+        // Récupérer les pôles
+        $this->poleManager->savePoles();
+        
+        // Récupérer les métiers
 
-        if (count($sortie) > 1) {
-            for ($i=0; $i < count($sortie); $i++) { 
-                $output->writeln([
-                    "----------",
-                    "Prénom : " . $sortie[$i]->prenom,
-                    "Nom : " . $sortie[$i]->nom,
-                    "Numéro court : " . $sortie[$i]->numeroCourt,
-                    "Numéro long : " . $sortie[$i]->numeroLong,
-                    "Email : " . $sortie[$i]->mail,
-                    "Pôle : " . $sortie[$i]->pole,
-                    "Métier : " . $sortie[$i]->metier,
-                    "Poste : " . $sortie[$i]->poste,
-                    "----------",
-                ]);
-            }
-            
-        } else {
-            $output->writeln([
-                $sortie[0],
-            ]);
-        }
+        // Récupérer les postes
+
+        // Récupérer les personnes
+
+        // Récupérer les contacts
 
         return Command::SUCCESS;
     }
