@@ -2,23 +2,34 @@
 
 namespace App\Entity;
 
+use App\Repository\PoleRepository;
+use Doctrine\ORM\Mapping as ORM;
+
+#[ORM\Entity(repositoryClass: PoleRepository::class)]
 class Pole
 {
-    private $nom;
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    private ?int $id = null;
 
-    public function __construct($nom) {
-        $this->setNom($nom);
+    #[ORM\Column(length: 255)]
+    private ?string $nom = null;
+
+    public function getId(): ?int
+    {
+        return $this->id;
     }
 
-    public function getNom() {
+    public function getNom(): ?string
+    {
         return $this->nom;
     }
 
-    public function setNom($nom) {
+    public function setNom(string $nom): self
+    {
         $this->nom = $nom;
-    }
 
-    public function __toString() {
-        return $this->getNom();
+        return $this;
     }
 }
