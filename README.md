@@ -1,29 +1,16 @@
-# Fonctionnement du composant Symfony Ldap
-## Se connecter au serveur Ldap sécurisé par StartTls
-    $ldap = Ldap::create('ext_ldap', [
-        'host' => 'my-server',
-        'encryption' => 'ssl',
-    ]);
+# ldapToDb
 
-Ou : 
+## Installation
+    git clone https://github.com/yannickbiheul/LdapToDb.git
+    composer install
 
-    $ldap = Ldap::create('ext_ldap', ['connection_string' => 'ldaps://my-server:636']);
+## Configuration
+- Dupliquer le fichier ".env" en ".env.local"
+- Décommenter et/ou modifier la ligne "DATABASE_URL"
 
-## Ajouter le dn et le password
-    $dn = "dn";
-    $password = "password";
-    $ldap->bind($dn, $password);
+## Fonctionnement
+- Une tâche planifiée est créée sur le serveur
+- Cette tâche lance la commande "app:test-command"
+- Ligne complète de cette tâche :
 
-## Faire des requêtes au serveur
-    $query = $ldap->query('dc=symfony,dc=com', '&(objectclass=person)(ou=Maintainers))');
-    $results = $query->execute();
-
-    foreach ($results as $entry) {
-        // Do something with the results
-    }
-
-### Pour retourner directement un tableau
-    $results = $query->execute()->toArray();
-
-### Utiliser l'option "filter" pour récupérer des attributs spécifiques
-    $query = $ldap->query('dc=symfony,dc=com', '...', ['filter' => ['cn', 'mail']);
+    php C:\Users\yannick.biheul\test\bin\console app:test-command 
