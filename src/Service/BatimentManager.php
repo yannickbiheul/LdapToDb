@@ -2,10 +2,10 @@
 
 namespace App\Service;
 
-use App\Entity\Pole;
+use App\Entity\Batiment;
 use App\Service\ConnectLdapService;
 
-class PoleManager
+class BatimentManager
 {
     private $ldap;
     private $connectLdapService;
@@ -19,26 +19,26 @@ class PoleManager
     }
 
     /**
-     * Lister tous les pôles : 
+     * Lister tous les bâtiments : 
      * Retourne array String
      */
-    public function listPoles()
+    public function listBatiments()
     {
         // Connexion au Ldap
         $ldap = $this->connectLdapService->connexionLdap();
         // Création d'un filtre de requête
         $filter = 'objectClass=peopleRecord';
         // Tableau des attributs demandés
-        $justThese = array('attr1');
+        $justThese = array('attr6');
         // Envoi de la requête
         $query = ldap_search($ldap, $this->connectLdapService->getBasePeople(), $filter, $justThese);
         // Récupération des réponses de la requête
         $infos = ldap_get_entries($ldap, $query);
-        // Remplissage du tableau de pôles
+        // Remplissage du tableau de bâtiments
         $tableau = array();
         for ($i=0; $i < count($infos); $i++) { 
-            if (isset($infos[$i]['attr1'])) {
-                $tableau[$i] = $infos[$i]['attr1'][0];
+            if (isset($infos[$i]['attr6'])) {
+                $tableau[$i] = $infos[$i]['attr6'][0];
             } 
         }
 
@@ -46,16 +46,16 @@ class PoleManager
     }
 
     /**
-     * Persister tous les pôles
+     * Persister tous les bâtiments
      * 
      */
-    public function savePoles()
+    public function saveBatiments()
     {
-        $infos = $this->listPoles();
+        $infos = $this->listBatiments();
 
-        $poles = array();
+        $batiments = array();
         for ($i=0; $i < count($infos); $i++) { 
-            $poles[$i] = new Pole($infos[$i]['attr1'][0]); 
+            $batiments[$i] = new Batiment($infos[$i]['attr6'][0]); 
         }
     }
 

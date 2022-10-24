@@ -2,6 +2,9 @@
 
 namespace App\Controller;
 
+use App\Service\BatimentManager;
+use App\Service\HopitalManager;
+use App\Service\MetierManager;
 use App\Service\PersonneManager;
 use App\Service\PoleManager;
 use Symfony\Component\HttpFoundation\Response;
@@ -13,14 +16,24 @@ class TestController extends AbstractController
 {
     private PersonneManager $personneManager;
     private PoleManager $poleManager;
+    private BatimentManager $batimentManager;
+    private HopitalManager $hopitalManager;
+    private MetierManager $metierManager;
 
     /**
      * Constructeur
      * Injection de PersonneManager
      */
-    public function __construct(PersonneManager $personneManager, PoleManager $poleManager) {
+    public function __construct(PersonneManager $personneManager, 
+                                PoleManager $poleManager, 
+                                BatimentManager $batimentManager,
+                                HopitalManager $hopitalManager,
+                                MetierManager $metierManager) {
         $this->personneManager = $personneManager;
         $this->poleManager = $poleManager;
+        $this->batimentManager = $batimentManager;
+        $this->hopitalManager = $hopitalManager;
+        $this->metierManager = $metierManager;
     }
 
     /**
@@ -29,9 +42,11 @@ class TestController extends AbstractController
     #[Route('/test', name: 'app_test')]
     public function index(): Response
     {
-        $poles = $this->poleManager->getPoles();
-        $tableauPoles = array();
-        dd($poles);
+        // dd($this->poleManager->listPoles());
+        // dd($this->batimentManager->listBatiments());
+        // dd($this->hopitalManager->listHopitaux());
+        // dd($this->metierManager->listMetiers());
+        $this->personneManager->listPersonnes();
         
         return $this->json([
 

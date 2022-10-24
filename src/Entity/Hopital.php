@@ -2,11 +2,11 @@
 
 namespace App\Entity;
 
-use App\Repository\PoleRepository;
+use App\Repository\HopitalRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: PoleRepository::class)]
-class Pole
+#[ORM\Entity(repositoryClass: HopitalRepository::class)]
+class Hopital
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -31,9 +31,5 @@ class Pole
         $this->nom = $nom;
 
         return $this;
-    }
-
-    public function __toString() {
-        return $this->nom;
     }
 }
