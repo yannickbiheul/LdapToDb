@@ -22,6 +22,10 @@ class PersonneManager
         $this->connectLdapService = $connectLdapService;
     }
 
+    /**
+     * Liste les personnes
+     * 
+     */
     public function listPersonnes() {
         // Connexion au Ldap
         $ldap = $this->connectLdapService->connexionLdap();
@@ -35,13 +39,17 @@ class PersonneManager
         $reponses = ldap_get_entries($ldap, $query);
         // Afficher ces réponses
         // dd($reponses);
-        // Crer un tableau qui contiendr des objets Personne
+
+        // Créer un tableau qui contiendra des objets Personne
         $personnes = array();
+
         // Parcourir les réponses une à une
         for ($i=0; $i < count($reponses); $i++) { 
             // Pour chaque réponse :
+
             // Création d'un objet Personne
             $personne = new Personne();
+
             // Gestion du prénom
             if (isset($reponses[$i]['givenname'][0]) && $reponses[$i]['givenname'][0] != " ") {
                 $personne->setPrenom($reponses[$i]['givenname'][0]);
@@ -72,6 +80,7 @@ class PersonneManager
             } else {
                 $personne->setMail("Valeur nulle");
             }
+
             // Si l'objet contient un prénom et un nom, alors c'est une personne
             if ($personne->getPrenom() != "Valeur nulle" && $personne->getNom() != "Valeur nulle" && 
                 !$this->checkLigneRouge($personne->getTelephoneCourt())) {
@@ -81,7 +90,7 @@ class PersonneManager
             } else {
 
                 unset($personnes[$i]);
-                
+
             }
             
         }
@@ -168,7 +177,7 @@ class PersonneManager
 
     /**
      * Contrainte n°1 : Vérifier que la ligne n'est pas une ligne rouge : 
-     * Retourne Booleen
+     * 
      */
     public function checkLigneRouge($numeroCourt) {
         // Connexion au Ldap
@@ -193,7 +202,7 @@ class PersonneManager
 
     /**
      * Contrainte n°2 : Vérifier que le numéro n'est pas un numéro de chambre : 
-     * Retourne Booleen
+     * 
      */
     public function checkNumeroChambre($hierarchySV) {
         return true;
