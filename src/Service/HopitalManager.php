@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Entity\Hopital;
 use App\Service\ConnectLdapService;
+use Doctrine\Persistence\ManagerRegistry;
 
 class HopitalManager
 {
@@ -49,14 +50,18 @@ class HopitalManager
      * Persister tous les hôpitaux
      * 
      */
-    public function saveHopitals()
+    public function saveHopitaux(ManagerRegistry $doctrine)
     {
-        $infos = $this->listHopitals();
+        $entityManager = $doctrine->getManager();
+        $listeHopitaux = $this->listHopitaux();
 
-        $hopitaux = array();
-        for ($i=0; $i < count($infos); $i++) { 
-            $hopitaux[$i] = new Hopital($infos[$i]['attr5'][0]); 
+        for ($i=0; $i < count($listeHopitaux); $i++) { 
+            $hopital = new Hopital();
+            $hopital->setNom($listeHopitaux[$i]['attr5'][0]);
+            $entityManager->persist($hopital);
         }
+
+        $entityManager->flush();
     }
 
 }

@@ -46,10 +46,10 @@ class TestController extends AbstractController
         // dd($this->batimentManager->listBatiments());
         // dd($this->hopitalManager->listHopitaux());
         // dd($this->metierManager->listMetiers());
-        $this->personneManager->listPersonnes();
+        // $this->personneManager->listPersonnes();
         
         return $this->json([
-
+            'hopitaux' => $this->hopitalManager->listHopitaux(),
         ]);
 
     }
