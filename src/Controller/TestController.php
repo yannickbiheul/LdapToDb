@@ -42,17 +42,24 @@ class TestController extends AbstractController
     #[Route('/test', name: 'app_test')]
     public function index(): Response
     {
-        // dd($this->poleManager->listPoles());
-        // dd($this->batimentManager->listBatiments());
-        // dd($this->hopitalManager->listHopitaux());
+        // Sauvegarder les hôpitaux
         $this->hopitalManager->saveHopitaux();
+        // Sauvegarder les bâtiments
         $this->batimentManager->saveBatiments();
+
+        // dd($this->poleManager->listPoles();
+        // $this->batimentManager->saveBatiments();
+        // dd($this->batimentManager->findHopital("DRM"));
+        // dd($this->hopitalManager->listHopitaux());
+        // $this->hopitalManager->saveHopitaux();
+        // $this->batimentManager->saveBatiments();
         // dd($this->metierManager->listMetiers());
         // $this->personneManager->listPersonnes();
         
         return $this->json([
             'hopitaux' => $this->hopitalManager->listHopitaux(),
             'batiments' => $this->batimentManager->listBatiments(),
+            'poles' => $this->poleManager->listPoles(),
         ]);
 
     }

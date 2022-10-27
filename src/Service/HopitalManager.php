@@ -61,7 +61,7 @@ class HopitalManager
         $listeHopitaux = $this->listHopitaux();
 
         foreach ($listeHopitaux as $key => $value) {
-            // Créer un objet Hopital
+            // Créer un objet
             $hopital = new Hopital();
             // Configurer son nom
             $hopital->setNom($value);

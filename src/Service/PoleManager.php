@@ -3,19 +3,25 @@
 namespace App\Service;
 
 use App\Entity\Pole;
+use App\Repository\PoleRepository;
 use App\Service\ConnectLdapService;
+use Doctrine\Persistence\ManagerRegistry;
 
 class PoleManager
 {
     private $ldap;
     private $connectLdapService;
+    private $doctrine;
+    private $poleRepo;
 
     /**
      * Constructeur
      * Injection de ConnectLdapService
      */
-    public function __construct(ConnectLdapService $connectLdapService) {
+    public function __construct(ConnectLdapService $connectLdapService, ManagerRegistry $doctrine, PoleRepository $poleRepo) {
         $this->connectLdapService = $connectLdapService;
+        $this->doctrine = $doctrine;
+        $this->poleRepo = $poleRepo;
     }
 
     /**
@@ -51,12 +57,23 @@ class PoleManager
      */
     public function savePoles()
     {
-        $infos = $this->listPoles();
+        $entityManager = $this->doctrine->getManager();
+        $listePoles = $this->listPoles();
 
-        $poles = array();
-        for ($i=0; $i < count($infos); $i++) { 
-            $poles[$i] = new Pole($infos[$i]['attr1'][0]); 
+        foreach ($listePoles as $key => $value) {
+            // Créer un objet 
+            $pole = new Pole();
+            // Configurer son nom
+            $pole->setNom($value);
+            // Vérifier qu'il n'existe pas dans la base de données
+            $existe = $this->poleRepo->findBy(["nom" => $pole->getNom()]);
+            if (count($existe) == 0) {
+                // Persister l'objet
+                $entityManager->persist($pole);
+            }
         }
+
+        $entityManager->flush();
     }
 
 }

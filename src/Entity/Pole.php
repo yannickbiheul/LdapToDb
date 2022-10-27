@@ -13,8 +13,11 @@ class Pole
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, unique: true)]
     private ?string $nom = null;
+
+    #[ORM\ManyToOne(inversedBy: 'poles')]
+    private ?Batiment $batiment = null;
 
     public function getId(): ?int
     {
@@ -35,5 +38,17 @@ class Pole
 
     public function __toString() {
         return $this->nom;
+    }
+
+    public function getBatiment(): ?Batiment
+    {
+        return $this->batiment;
+    }
+
+    public function setBatiment(?Batiment $batiment): self
+    {
+        $this->batiment = $batiment;
+
+        return $this;
     }
 }
