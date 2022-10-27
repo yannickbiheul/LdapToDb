@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Entity\Hopital;
+use App\Repository\HopitalRepository;
 use App\Service\ConnectLdapService;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -10,13 +11,17 @@ class HopitalManager
 {
     private $ldap;
     private $connectLdapService;
+    private $doctrine;
+    private $hopitalRepo;
 
     /**
      * Constructeur
      * Injection de ConnectLdapService
      */
-    public function __construct(ConnectLdapService $connectLdapService) {
+    public function __construct(ConnectLdapService $connectLdapService, ManagerRegistry $doctrine, HopitalRepository $hopitalRepo) {
         $this->connectLdapService = $connectLdapService;
+        $this->doctrine = $doctrine;
+        $this->hopitalRepo = $hopitalRepo;
     }
 
     /**
@@ -50,15 +55,22 @@ class HopitalManager
      * Persister tous les hôpitaux
      * 
      */
-    public function saveHopitaux(ManagerRegistry $doctrine)
+    public function saveHopitaux()
     {
-        $entityManager = $doctrine->getManager();
+        $entityManager = $this->doctrine->getManager();
         $listeHopitaux = $this->listHopitaux();
 
-        for ($i=0; $i < count($listeHopitaux); $i++) { 
+        foreach ($listeHopitaux as $key => $value) {
+            // Créer un objet Hopital
             $hopital = new Hopital();
-            $hopital->setNom($listeHopitaux[$i]['attr5'][0]);
-            $entityManager->persist($hopital);
+            // Configurer son nom
+            $hopital->setNom($value);
+            // Vérifier qu'il n'existe pas dans la base de données
+            $existe = $this->hopitalRepo->findBy(["nom" => $hopital->getNom()]);
+            if (count($existe) == 0) {
+                // Persister l'objet
+                $entityManager->persist($hopital);
+            }
         }
 
         $entityManager->flush();

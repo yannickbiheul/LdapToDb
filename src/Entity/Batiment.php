@@ -13,8 +13,11 @@ class Batiment
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, unique: true)]
     private ?string $nom = null;
+
+    #[ORM\ManyToOne(inversedBy: 'batiments')]
+    private ?Hopital $hopital = null;
 
     public function getId(): ?int
     {
@@ -29,6 +32,18 @@ class Batiment
     public function setNom(string $nom): self
     {
         $this->nom = $nom;
+
+        return $this;
+    }
+
+    public function getHopital(): ?Hopital
+    {
+        return $this->hopital;
+    }
+
+    public function setHopital(?Hopital $hopital): self
+    {
+        $this->hopital = $hopital;
 
         return $this;
     }

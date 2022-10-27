@@ -3,19 +3,25 @@
 namespace App\Service;
 
 use App\Entity\Batiment;
+use App\Repository\BatimentRepository;
 use App\Service\ConnectLdapService;
+use Doctrine\Persistence\ManagerRegistry;
 
 class BatimentManager
 {
     private $ldap;
     private $connectLdapService;
+    private $doctrine;
+    private $batimentRepo;
 
     /**
      * Constructeur
      * Injection de ConnectLdapService
      */
-    public function __construct(ConnectLdapService $connectLdapService) {
+    public function __construct(ConnectLdapService $connectLdapService, ManagerRegistry $doctrine, BatimentRepository $batimentRepo) {
         $this->connectLdapService = $connectLdapService;
+        $this->doctrine = $doctrine;
+        $this->batimentRepo = $batimentRepo;
     }
 
     /**
@@ -51,12 +57,23 @@ class BatimentManager
      */
     public function saveBatiments()
     {
-        $infos = $this->listBatiments();
+        $entityManager = $this->doctrine->getManager();
+        $listeBatiments = $this->listBatiments();
 
-        $batiments = array();
-        for ($i=0; $i < count($infos); $i++) { 
-            $batiments[$i] = new Batiment($infos[$i]['attr6'][0]); 
+        foreach ($listeBatiments as $key => $value) {
+            // Créer un objet Hopital
+            $batiment = new Batiment();
+            // Configurer son nom
+            $batiment->setNom($value);
+            // Vérifier qu'il n'existe pas dans la base de données
+            $existe = $this->batimentRepo->findBy(["nom" => $batiment->getNom()]);
+            if (count($existe) == 0) {
+                // Persister l'objet
+                $entityManager->persist($batiment);
+            }
         }
+
+        $entityManager->flush();
     }
 
 }
