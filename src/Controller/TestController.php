@@ -46,6 +46,8 @@ class TestController extends AbstractController
         $this->hopitalManager->saveHopitaux();
         // Sauvegarder les bâtiments
         $this->batimentManager->saveBatiments();
+        // Sauvegarder les pôles
+        $this->poleManager->savePoles();
 
         // dd($this->poleManager->listPoles();
         // $this->batimentManager->saveBatiments();

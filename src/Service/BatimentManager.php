@@ -99,6 +99,7 @@ class BatimentManager
                 $hopital = $this->findHopital($batiment->getNom());
                 $batiment->setHopital($hopital[0]);
             }
+            
             // Vérifier qu'il n'existe pas dans la base de données
             $existe = $this->batimentRepo->findBy(["nom" => $batiment->getNom()]);
             if (count($existe) == 0) {

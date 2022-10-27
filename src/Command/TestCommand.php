@@ -18,36 +18,42 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class TestCommand extends Command
 {
-    private $personneManager;
-    private $poleManager;
+    private PersonneManager $personneManager;
+    private PoleManager $poleManager;
+    private BatimentManager $batimentManager;
+    private HopitalManager $hopitalManager;
+    private MetierManager $metierManager;
 
     /**
      * Constructeur
      * Injection de PersonneManager
      */
-    public function __construct(PersonneManager $personneManager, PoleManager $poleManager)
+    public function __construct(PersonneManager $personneManager, 
+                                PoleManager $poleManager, 
+                                BatimentManager $batimentManager,
+                                HopitalManager $hopitalManager,
+                                MetierManager $metierManager)
     {
         $this->personneManager = $personneManager;
         $this->poleManager = $poleManager;
+        $this->batimentManager = $batimentManager;
+        $this->hopitalManager = $hopitalManager;
+        $this->metierManager = $metierManager;
         parent::__construct();
     }
 
     /**
      * Execute : 
-     * Récupère les tables et les envoie à la base de données Drupal
+     * Récupère les tables et les envoie à la base de données
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        // Récupérer les pôles
+        // Sauvegarder les hôpitaux
+        $this->hopitalManager->saveHopitaux();
+        // Sauvegarder les bâtiments
+        $this->batimentManager->saveBatiments();
+        // Sauvegarder les pôles
         $this->poleManager->savePoles();
-        
-        // Récupérer les métiers
-
-        // Récupérer les postes
-
-        // Récupérer les personnes
-
-        // Récupérer les contacts
 
         return Command::SUCCESS;
     }

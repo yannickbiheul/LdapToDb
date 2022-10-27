@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Entity\Pole;
+use App\Repository\BatimentRepository;
 use App\Repository\PoleRepository;
 use App\Service\ConnectLdapService;
 use Doctrine\Persistence\ManagerRegistry;
@@ -13,15 +14,20 @@ class PoleManager
     private $connectLdapService;
     private $doctrine;
     private $poleRepo;
+    private $batimentRepo;
 
     /**
      * Constructeur
      * Injection de ConnectLdapService
      */
-    public function __construct(ConnectLdapService $connectLdapService, ManagerRegistry $doctrine, PoleRepository $poleRepo) {
+public function __construct(ConnectLdapService $connectLdapService, 
+                            ManagerRegistry $doctrine, 
+                            PoleRepository $poleRepo, 
+                            BatimentRepository $batimentRepo) {
         $this->connectLdapService = $connectLdapService;
         $this->doctrine = $doctrine;
         $this->poleRepo = $poleRepo;
+        $this->batimentRepo = $batimentRepo;
     }
 
     /**
@@ -52,6 +58,29 @@ class PoleManager
     }
 
     /**
+     * Trouver le bâtiment du pôle : 
+     * Retourne Batiment
+     */
+    public function findBatiment($nomPole) {
+        // Connexion au Ldap
+        $ldap = $this->connectLdapService->connexionLdap();
+        // Création d'un filtre de requête
+        $filter = 'attr1='.$nomPole.'';
+        // Tableau des attributs demandés
+        $justThese = array('attr6');
+        // Envoi de la requête
+        $query = ldap_search($ldap, $this->connectLdapService->getBasePeople(), $filter, $justThese);
+        // Récupération des réponses de la requête
+        $infos = ldap_get_entries($ldap, $query);
+        
+        if (in_array('attr6', $infos[0])) {
+            $batiment = $this->batimentRepo->findBy(["nom" => $infos[0]['attr6'][0]]);
+            return $batiment;
+        }
+        return null;
+    }
+
+    /**
      * Persister tous les pôles
      * 
      */
@@ -65,6 +94,12 @@ class PoleManager
             $pole = new Pole();
             // Configurer son nom
             $pole->setNom($value);
+            // Configurer son Batiment
+            if ($this->findBatiment($pole->getNom()) != null) {
+                $batiment = $this->findBatiment($pole->getNom());
+                $pole->setBatiment($batiment[0]);
+            }
+
             // Vérifier qu'il n'existe pas dans la base de données
             $existe = $this->poleRepo->findBy(["nom" => $pole->getNom()]);
             if (count($existe) == 0) {
