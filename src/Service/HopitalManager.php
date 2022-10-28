@@ -18,7 +18,9 @@ class HopitalManager
      * Constructeur
      * Injection de ConnectLdapService
      */
-    public function __construct(ConnectLdapService $connectLdapService, ManagerRegistry $doctrine, HopitalRepository $hopitalRepo) {
+    public function __construct(ConnectLdapService $connectLdapService, 
+                                ManagerRegistry $doctrine, 
+                                HopitalRepository $hopitalRepo) {
         $this->connectLdapService = $connectLdapService;
         $this->doctrine = $doctrine;
         $this->hopitalRepo = $hopitalRepo;
@@ -40,6 +42,7 @@ class HopitalManager
         $query = ldap_search($ldap, $this->connectLdapService->getBasePeople(), $filter, $justThese);
         // Récupération des réponses de la requête
         $infos = ldap_get_entries($ldap, $query);
+
         // Remplissage du tableau de bâtiments
         $tableau = array();
         for ($i=0; $i < count($infos); $i++) { 
@@ -65,6 +68,7 @@ class HopitalManager
             $hopital = new Hopital();
             // Configurer son nom
             $hopital->setNom($value);
+            
             // Vérifier qu'il n'existe pas dans la base de données
             $existe = $this->hopitalRepo->findBy(["nom" => $hopital->getNom()]);
             if (count($existe) == 0) {

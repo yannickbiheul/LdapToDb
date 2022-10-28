@@ -2,8 +2,11 @@
 
 namespace App\Command;
 
-use App\Service\PersonneManager;
 use App\Service\PoleManager;
+use App\Service\MetierManager;
+use App\Service\HopitalManager;
+use App\Service\BatimentManager;
+use App\Service\PersonneManager;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;

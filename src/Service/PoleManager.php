@@ -73,6 +73,7 @@ public function __construct(ConnectLdapService $connectLdapService,
         // Récupération des réponses de la requête
         $infos = ldap_get_entries($ldap, $query);
         
+        // Vérifier que le pôle est bien relié à un bâtiment
         if (in_array('attr6', $infos[0])) {
             $batiment = $this->batimentRepo->findBy(["nom" => $infos[0]['attr6'][0]]);
             return $batiment;

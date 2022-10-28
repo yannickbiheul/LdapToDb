@@ -46,6 +46,7 @@ class BatimentManager
         $query = ldap_search($ldap, $this->connectLdapService->getBasePeople(), $filter, $justThese);
         // Récupération des réponses de la requête
         $infos = ldap_get_entries($ldap, $query);
+
         // Remplissage du tableau de bâtiments
         $tableau = array();
         for ($i=0; $i < count($infos); $i++) { 
@@ -73,6 +74,7 @@ class BatimentManager
         // Récupération des réponses de la requête
         $infos = ldap_get_entries($ldap, $query);
         
+        // Vérifier que le bâtiment est bien relié à un hôpital
         if (in_array('attr5', $infos[0])) {
             $hopital = $this->hopitalRepo->findBy(["nom" => $infos[0]['attr5'][0]]);
             return $hopital;
