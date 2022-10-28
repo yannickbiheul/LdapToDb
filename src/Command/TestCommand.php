@@ -57,6 +57,8 @@ class TestCommand extends Command
         $this->batimentManager->saveBatiments();
         // Sauvegarder les pôles
         $this->poleManager->savePoles();
+        // Sauvegarder les métiers
+        $this->metierManager->saveMetiers();
 
         return Command::SUCCESS;
     }

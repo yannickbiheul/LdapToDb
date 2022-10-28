@@ -42,12 +42,15 @@ class TestController extends AbstractController
     #[Route('/test', name: 'app_test')]
     public function index(): Response
     {
+        dd($this->poleManager->listPoles());
         // Sauvegarder les hôpitaux
         $this->hopitalManager->saveHopitaux();
         // Sauvegarder les bâtiments
         $this->batimentManager->saveBatiments();
         // Sauvegarder les pôles
         $this->poleManager->savePoles();
+        // Sauvegarder les métiers
+        $this->metierManager->saveMetiers();
 
         // dd($this->poleManager->listPoles();
         // $this->batimentManager->saveBatiments();

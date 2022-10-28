@@ -3,19 +3,27 @@
 namespace App\Service;
 
 use App\Entity\Metier;
+use App\Repository\MetierRepository;
 use App\Service\ConnectLdapService;
+use Doctrine\Persistence\ManagerRegistry;
 
 class MetierManager
 {
     private $ldap;
     private $connectLdapService;
+    private $doctrine;
+    private $metierRepo;
 
     /**
      * Constructeur
      * Injection de ConnectLdapService
      */
-    public function __construct(ConnectLdapService $connectLdapService) {
+    public function __construct(ConnectLdapService $connectLdapService, 
+                                ManagerRegistry $doctrine,
+                                MetierRepository $metierRepo) {
         $this->connectLdapService = $connectLdapService;
+        $this->doctrine = $doctrine;
+        $this->metierRepo = $metierRepo;
     }
 
     /**
@@ -34,7 +42,7 @@ class MetierManager
         $query = ldap_search($ldap, $this->connectLdapService->getBasePeople(), $filter, $justThese);
         // Récupération des réponses de la requête
         $infos = ldap_get_entries($ldap, $query);
-        // Remplissage du tableau de bâtiments
+        // Remplissage du tableau de métiers
         $tableau = array();
         for ($i=0; $i < count($infos); $i++) { 
             if (isset($infos[$i]['attr7'])) {
@@ -51,12 +59,24 @@ class MetierManager
      */
     public function saveMetiers()
     {
-        $infos = $this->listMetiers();
+        $entityManager = $this->doctrine->getManager();
+        $listeMetiers = $this->listMetiers();
 
-        $metiers = array();
-        for ($i=0; $i < count($infos); $i++) { 
-            $metiers[$i] = new Metier($infos[$i]['attr6'][0]); 
+        foreach ($listeMetiers as $key => $value) {
+            // Créer un objet
+            $metier = new Metier();
+            // Configurer son nom
+            $metier->setNom($value);
+            
+            // Vérifier qu'il n'existe pas dans la base de données
+            $existe = $this->metierRepo->findBy(["nom" => $metier->getNom()]);
+            if (count($existe) == 0) {
+                // Persister l'objet
+                $entityManager->persist($metier);
+            }
         }
+
+        $entityManager->flush();
     }
 
 }
