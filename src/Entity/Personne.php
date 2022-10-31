@@ -31,6 +31,9 @@ class Personne
     #[ORM\ManyToOne(inversedBy: 'personnes')]
     private ?Metier $metier = null;
 
+    #[ORM\ManyToOne(inversedBy: 'personnes')]
+    private ?Hopital $hopital = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -104,6 +107,18 @@ class Personne
     public function setMetier(?Metier $metier): self
     {
         $this->metier = $metier;
+
+        return $this;
+    }
+
+    public function getHopital(): ?Hopital
+    {
+        return $this->hopital;
+    }
+
+    public function setHopital(?Hopital $hopital): self
+    {
+        $this->hopital = $hopital;
 
         return $this;
     }

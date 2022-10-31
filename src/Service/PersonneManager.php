@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Entity\Metier;
 use App\Entity\Personne;
+use App\Repository\HopitalRepository;
 use App\Service\ConnectLdapService;
 use App\Repository\MetierRepository;
 use App\Repository\PersonneRepository;
@@ -20,6 +21,7 @@ class PersonneManager
     private $metierRepo;
     private $doctrine;
     private $personneRepo;
+    private $hopitalRepo;
 
     /**
      * Constructeur
@@ -28,11 +30,13 @@ class PersonneManager
     public function __construct(ConnectLdapService $connectLdapService,
                                 MetierRepository $metierRepo,
                                 ManagerRegistry $doctrine,
-                                PersonneRepository $personneRepo) {
+                                PersonneRepository $personneRepo,
+                                HopitalRepository $hopitalRepo) {
         $this->connectLdapService = $connectLdapService;
         $this->metierRepo = $metierRepo;
         $this->doctrine = $doctrine;
         $this->personneRepo = $personneRepo;
+        $this->hopitalRepo = $hopitalRepo;
     }
 
     /**
@@ -46,7 +50,7 @@ class PersonneManager
         // Création d'un filtre de requête
         $filter = '(&(objectClass=peopleRecord)(sn=*))';
         // Tableau des attributs demandés
-        $justThese = array('hierarchySV', 'sn', 'givenName', 'displayGn', 'mainLineNumber', 'didNumbers', 'mail', 'attr1', 'attr3', 'attr7', 'cleUid');
+        $justThese = array('hierarchySV', 'sn', 'givenName', 'displayGn', 'mainLineNumber', 'didNumbers', 'mail', 'attr1', 'attr3', 'attr5', 'attr7', 'cleUid');
         // Envoi de la requête
         $query = ldap_search($ldap, $this->connectLdapService->getBasePeople(), $filter, $justThese);
         // Récupération des réponses de la requête
@@ -81,30 +85,6 @@ class PersonneManager
     }
 
     /**
-     * Trouver le métier de la personne : 
-     * Retourne Metier
-     */
-    public function findMetier($nomPersonne, $prenomPersonne) {
-        // Connexion au Ldap
-        $ldap = $this->connectLdapService->connexionLdap();
-        // Création d'un filtre de requête
-        $filter = '(&(sn='.$nomPersonne.')(displayGn='.$prenomPersonne.'))';
-        // Tableau des attributs demandés
-        $justThese = array('attr7');
-        // Envoi de la requête
-        $query = ldap_search($ldap, $this->connectLdapService->getBasePeople(), $filter, $justThese);
-        // Récupération des réponses de la requête
-        $metier = ldap_get_entries($ldap, $query);
-        
-        // Vérifier que la personne est bien reliée à un métier
-        if (in_array('attr7', $metier[0])) {
-            $metier = $this->metierRepo->findBy(["nom" => $metier[0]['attr7'][0]]);
-            return $metier;
-        }
-        return null;
-    }
-
-    /**
      * Persister toutes les personnes
      */
     public function savePersonnes()
@@ -133,9 +113,17 @@ class PersonneManager
             // Configurer son métier
             if ($this->findMetier($personne->getNom(), $personne->getPrenom()) != null) {
                 $metier = $this->findMetier($personne->getNom(), $personne->getPrenom());
-                $personne->setMetier($metier[0]);
+                $personne->setMetier($metier);
             } else {
                 $personne->setMetier(null);
+            }
+
+            // Configurer son hôpital
+            if ($this->findHopital($personne->getNom(), $personne->getPrenom()) != null) {
+                $hopital = $this->findHopital($personne->getNom(), $personne->getPrenom());
+                $personne->setHopital($hopital);
+            } else {
+                $personne->setHopital(null);
             }
 
             // Vérifier qu'il n'existe pas dans la base de données
@@ -150,6 +138,55 @@ class PersonneManager
         }
 
         $entityManager->flush();
+        
+    }
+
+    /**
+     * Trouver le métier de la personne : 
+     * Retourne Metier
+     */
+    public function findMetier($nomPersonne, $prenomPersonne) {
+        // Connexion au Ldap
+        $ldap = $this->connectLdapService->connexionLdap();
+        // Création d'un filtre de requête
+        $filter = '(&(sn='.$nomPersonne.')(displayGn='.$prenomPersonne.'))';
+        // Tableau des attributs demandés
+        $justThese = array('attr7');
+        // Envoi de la requête
+        $query = ldap_search($ldap, $this->connectLdapService->getBasePeople(), $filter, $justThese);
+        // Récupération des réponses de la requête
+        $metier = ldap_get_entries($ldap, $query);
+        
+        // Vérifier que la personne est bien reliée à un métier
+        if (in_array('attr7', $metier[0])) {
+            $metier = $this->metierRepo->findBy(["nom" => $metier[0]['attr7'][0]]);
+            return $metier[0];
+        }
+        return null;
+    }
+
+    /**
+     * Trouver l'hôpital de la personne : 
+     * Retourne Hopital
+     */
+    public function findHopital($nomPersonne, $prenomPersonne) {
+        // Connexion au Ldap
+        $ldap = $this->connectLdapService->connexionLdap();
+        // Création d'un filtre de requête
+        $filter = '(&(sn='.$nomPersonne.')(displayGn='.$prenomPersonne.'))';
+        // Tableau des attributs demandés
+        $justThese = array('attr5');
+        // Envoi de la requête
+        $query = ldap_search($ldap, $this->connectLdapService->getBasePeople(), $filter, $justThese);
+        // Récupération des réponses de la requête
+        $hopital = ldap_get_entries($ldap, $query);
+        
+        // Vérifier que la personne est bien reliée à un hôpital
+        if (in_array('attr5', $hopital[0])) {
+            $hopital = $this->hopitalRepo->findBy(["nom" => $hopital[0]['attr5'][0]]);
+            return $hopital[0];
+        }
+        return null;
     }
 
     /**

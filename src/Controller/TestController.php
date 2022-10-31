@@ -47,19 +47,19 @@ class TestController extends AbstractController
     public function index(): Response
     {
         // // Sauvegarder les hôpitaux
-        // $this->hopitalManager->saveHopitaux();
+        $this->hopitalManager->saveHopitaux();
         // // Sauvegarder les bâtiments
-        // $this->batimentManager->saveBatiments();
+        $this->batimentManager->saveBatiments();
         // // Sauvegarder les pôles
-        // $this->poleManager->savePoles();
+        $this->poleManager->savePoles();
         // // Sauvegarder les métiers
-        // $this->metierManager->saveMetiers();
+        $this->metierManager->saveMetiers();
         // // Sauvegarder les services
-        // $this->serviceManager->saveServices();
+        $this->serviceManager->saveServices();
         $this->personneManager->savePersonnes();
         
         return $this->json([
-            'hopitaux' => $this->hopitalManager->listHopitaux(),
+            'personnes' => $this->personneManager->listPersonnes(),
             // 'batiments' => $this->batimentManager->listBatiments(),
             // 'poles' => $this->poleManager->listPoles(),
             // 'métiers' => $this->metierManager->listMetiers(),
