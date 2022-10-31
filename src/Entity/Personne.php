@@ -28,6 +28,9 @@ class Personne
     #[ORM\Column(length: 255)]
     private ?string $telephone_long = null;
 
+    #[ORM\ManyToOne(inversedBy: 'personnes')]
+    private ?Metier $metier = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -89,6 +92,18 @@ class Personne
     public function setTelephoneLong(string $telephone_long): self
     {
         $this->telephone_long = $telephone_long;
+
+        return $this;
+    }
+
+    public function getMetier(): ?Metier
+    {
+        return $this->metier;
+    }
+
+    public function setMetier(?Metier $metier): self
+    {
+        $this->metier = $metier;
 
         return $this;
     }

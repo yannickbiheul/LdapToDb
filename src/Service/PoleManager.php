@@ -46,6 +46,7 @@ public function __construct(ConnectLdapService $connectLdapService,
         $query = ldap_search($ldap, $this->connectLdapService->getBasePeople(), $filter, $justThese);
         // Récupération des réponses de la requête
         $infos = ldap_get_entries($ldap, $query);
+
         // Remplissage du tableau de pôles
         $tableau = array();
         for ($i=0; $i < count($infos); $i++) { 
@@ -64,18 +65,18 @@ public function __construct(ConnectLdapService $connectLdapService,
     public function findBatiment($nomPole) {
         // Connexion au Ldap
         $ldap = $this->connectLdapService->connexionLdap();
-        // Création d'un filtre de requête
+        // Récupérer toutes les entrées qui ont comme attribut "attr1" le nom du pôle.
         $filter = 'attr1='.$nomPole.'';
-        // Tableau des attributs demandés
+        // Afficher seulement les attributs "attr6", qui correspondent aux bâtiments.
         $justThese = array('attr6');
         // Envoi de la requête
         $query = ldap_search($ldap, $this->connectLdapService->getBasePeople(), $filter, $justThese);
         // Récupération des réponses de la requête
-        $infos = ldap_get_entries($ldap, $query);
+        $batiments = ldap_get_entries($ldap, $query);
         
         // Vérifier que le pôle est bien relié à un bâtiment
-        if (in_array('attr6', $infos[0])) {
-            $batiment = $this->batimentRepo->findBy(["nom" => $infos[0]['attr6'][0]]);
+        if (in_array('attr6', $batiments[0])) {
+            $batiment = $this->batimentRepo->findBy(["nom" => $batiments[0]['attr6'][0]]);
             return $batiment;
         }
         return null;

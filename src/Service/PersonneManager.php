@@ -2,8 +2,12 @@
 
 namespace App\Service;
 
+use App\Entity\Metier;
 use App\Entity\Personne;
 use App\Service\ConnectLdapService;
+use App\Repository\MetierRepository;
+use App\Repository\PersonneRepository;
+use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * Contrainte n°1 : Ne pas afficher les lignes rouges
@@ -13,17 +17,27 @@ class PersonneManager
 {
     private $ldap;
     private $connectLdapService;
+    private $metierRepo;
+    private $doctrine;
+    private $personneRepo;
 
     /**
      * Constructeur
      * Injection de ConnectLdapService
      */
-    public function __construct(ConnectLdapService $connectLdapService) {
+    public function __construct(ConnectLdapService $connectLdapService,
+                                MetierRepository $metierRepo,
+                                ManagerRegistry $doctrine,
+                                PersonneRepository $personneRepo) {
         $this->connectLdapService = $connectLdapService;
+        $this->metierRepo = $metierRepo;
+        $this->doctrine = $doctrine;
+        $this->personneRepo = $personneRepo;
     }
 
     /**
-     * Liste les personnes
+     * Lister toutes les personnes : 
+     * Retourne array array string
      * 
      */
     public function listPersonnes() {
@@ -36,85 +50,125 @@ class PersonneManager
         // Envoi de la requête
         $query = ldap_search($ldap, $this->connectLdapService->getBasePeople(), $filter, $justThese);
         // Récupération des réponses de la requête
-        $reponses = ldap_get_entries($ldap, $query);
-        // Afficher ces réponses
-        // dd($reponses[0]['displaygn'][0]);
+        $personnesTotal = ldap_get_entries($ldap, $query);
 
-        // Création d'un tableau pour stocker les personnes
-        $personnes = array();
-        // parcourir les réponses
-        for ($i=0; $i < count($reponses); $i++) { 
+        // Retirer les chambres
+        $personnesWithoutChambers = $this->removeChambers($personnesTotal);
 
-            // Création d'un objet Personne
-            $personne = new Personne();
-
-            // Ajouter le prénom
-            if((isset($reponses[$i]['displaygn'][0]) && $reponses[$i]['displaygn'][0] != " ") || 
-                (isset($reponses[$i]['givenname'][0]) && $reponses[$i]['givenname'][0] != " ")) {
-                $personne->setPrenom($reponses[$i]['displaygn'][0]);
-            } else {
-                $personne->setPrenom('Valeur nulle');
+        // retirer les listes rouges
+        $personnesInGreenList = array();
+        foreach ($personnesWithoutChambers as $personne) {
+            if(array_key_exists('mainlinenumber', $personne)) {
+                if(!$this->isRedList($personne['mainlinenumber'][0])) {
+                    array_push($personnesInGreenList, $personne);
+                } 
             }
-            // Ajouter le nom
-            if (isset($reponses[$i]['sn'][0]) && $reponses[$i]['sn'][0] != " ") {
-                $personne->setNom($reponses[$i]['sn'][0]);
-            } else {
-                $personne->setNom("Valeur nulle");
-            }
-            // Ajouter le téléphone long
-            if (isset($reponses[$i]['didnumbers'][0]) && $reponses[$i]['didnumbers'][0] != " ") {
-                $personne->setTelephoneLong($reponses[$i]['didnumbers'][0]);
-            } else {
-                $personne->setTelephoneLong("Valeur nulle");
-            }
-            // Ajouter le téléphone court
-            if (isset($reponses[$i]['mainlinenumber'][0]) && $reponses[$i]['mainlinenumber'][0] != " ") {
-                $personne->setTelephoneCourt($reponses[$i]['mainlinenumber'][0]);
-            } else {
-                $personne->setTelephoneCourt("Valeur nulle");
-            }
-            // Ajouter le mail
-            if (isset($reponses[$i]['mail'][0]) && $reponses[$i]['mail'][0] != " ") {
-                $personne->setMail($reponses[$i]['mail'][0]);
-            } else {
-                $personne->setMail("Valeur nulle");
-            }
-
-            $personnes[$i] = $personne;
-
-            // Si l'objet contient un prénom et un nom 
-            if ($personne->getPrenom() != "Valeur nulle" && $personne->getNom() != "Valeur nulle") {
-                $personnes[$i] = $personne;
-            } else {
-                unset($personnes[$i]);
-            }
-
+            
         }
 
-        dd($personnes);
+        // Séparer les personnes et les services
+        $personnes = array();
+        $services = array();
+        foreach ($personnesInGreenList as $personne) {
+            if ($personne['givenname'][0] != " " || $personne['givenname'][0] == null) {
+                array_push($personnes, $personne);
+            } else {
+                array_push($services, $personne);
+            }
+        }
 
+        return $personnes;
     }
 
     /**
-     * Contrainte n°1 : Vérifier que la ligne n'est pas une ligne rouge : 
-     * 
+     * Trouver le métier de la personne : 
+     * Retourne Metier
      */
-    public function checkLigneRouge($numeroCourt) {
+    public function findMetier($nomPersonne, $prenomPersonne) {
         // Connexion au Ldap
         $ldap = $this->connectLdapService->connexionLdap();
         // Création d'un filtre de requête
-        $filter = '(&(objectClass=numberRecord)(phoneNumber=' . $numeroCourt .'))';
+        $filter = '(&(sn='.$nomPersonne.')(displayGn='.$prenomPersonne.'))';
+        // Tableau des attributs demandés
+        $justThese = array('attr7');
+        // Envoi de la requête
+        $query = ldap_search($ldap, $this->connectLdapService->getBasePeople(), $filter, $justThese);
+        // Récupération des réponses de la requête
+        $metier = ldap_get_entries($ldap, $query);
+        
+        // Vérifier que la personne est bien reliée à un métier
+        if (in_array('attr7', $metier[0])) {
+            $metier = $this->metierRepo->findBy(["nom" => $metier[0]['attr7'][0]]);
+            return $metier;
+        }
+        return null;
+    }
+
+    /**
+     * Persister toutes les personnes
+     */
+    public function savePersonnes()
+    {
+        $entityManager = $this->doctrine->getManager();
+        $listePersonnes = $this->listPersonnes();
+
+        foreach($listePersonnes as $key => $value) {
+            // Créer un objet
+            $personne = new Personne();
+            // Hydrater l'objet
+            $personne->setNom($value['sn'][0]);
+            $personne->setPrenom($value['displaygn'][0]);
+            if (in_array('mail', $value)) {
+                $personne->setMail($value['mail'][0]);
+            } else {
+                $personne->setMail("pas de mail");
+            }
+            $personne->setTelephoneCourt($value['mainlinenumber'][0]);
+            if (in_array('didnumbers', $value)) {
+                $personne->setTelephoneLong($value['didnumbers'][0]);
+            } else {
+                $personne->setTelephoneLong("pas de numéro long");
+            }
+            
+            // Configurer son métier
+            if ($this->findMetier($personne->getNom(), $personne->getPrenom()) != null) {
+                $metier = $this->findMetier($personne->getNom(), $personne->getPrenom());
+                $personne->setMetier($metier[0]);
+            } else {
+                $personne->setMetier(null);
+            }
+
+            // Vérifier qu'il n'existe pas dans la base de données
+            $existeNom = $this->personneRepo->findBy(["nom" => $personne->getNom()]);
+            if (count($existeNom) == 0) {
+                $existePrenom = $this->personneRepo->findBy(["prenom" => $personne->getPrenom()]);
+                if (count($existePrenom) == 0) {
+                    // Persister l'objet
+                    $entityManager->persist($personne);
+                } 
+            }
+        }
+
+        $entityManager->flush();
+    }
+
+    /**
+     * Contrainte n°1 : Vérifier que le numéro n'est pas en liste rouge
+     * 
+     */
+    public function isRedList($numero) {
+        // Connexion au Ldap
+        $ldap = $this->connectLdapService->connexionLdap();
+        // Création d'un filtre de requête
+        $filter = '(&(objectClass=numberRecord)(phoneNumber=' . $numero .'))';
         // Tableau des attributs demandés
         $justThese = array('mainLineNumber', 'private');
         // Envoi de la requête
         $query = ldap_search($ldap, $this->connectLdapService->getBasePeople(), $filter, $justThese);
         // Récupération des réponses de la requête
-        $reponses = ldap_get_entries($ldap, $query);
-        // Afficher ces réponses
-        // dd($reponses[0]['private'][0]);
-
-        // Si la valeur est "LR", alors c'est une liste rouge
-        if($reponses[0]['private'][0] == "LR" && !defined($reponses[0]['private'][0])) {
+        $result = ldap_get_entries($ldap, $query);
+        
+        if ($result[0]['private'][0] == "LR") {
             return true;
         } else {
             return false;
@@ -122,80 +176,23 @@ class PersonneManager
     }
 
     /**
-     * Contrainte n°2 : Vérifier que le numéro n'est pas un numéro de chambre : 
-     * 
+     * Contrainte n°2 : Suppression des numéros de chambres
+     * Retourne array string
      */
-    public function checkNumeroChambre($numeroCourt) {
-        // Connexion au Ldap
-        $ldap = $this->connectLdapService->connexionLdap();
-        // Création d'un filtre de requête
-        $filter = '(&(objectClass=peopleRecord)(phoneNumber=' . $numeroCourt .'))';
-        // Tableau des attributs demandés
-        $justThese = array('hierarchySV');
-        // Envoi de la requête
-        $query = ldap_search($ldap, $this->connectLdapService->getBasePeople(), $filter, $justThese);
-        // Récupération des réponses de la requête
-        $reponses = ldap_get_entries($ldap, $query);
-        // Afficher ces réponses
-        dd($reponses);
-        return true;
-    }
+    public function removeChambers($personnesTotal) {
+        // Créer un nouveau tableau
+        $personnes = array();
+        
+        // Parcourir les personnes
+        for ($i=0; $i < count($personnesTotal)-1; $i++) {
 
-    /**
-     * Trouver les infos d'une personne par son nom
-     */
-    public function findPeopleByName($sn)
-    {
-        // Connexion au Ldap
-        $ldap = $this->connectLdapService->connexionLdap();
-        // Création d'un filtre de requête
-        $filter = '(&(objectClass=peopleRecord)(sn=' . $sn . '))';
-        // Tableau des attributs demandés
-        $justThese = array('hierarchySV', 'sn', 'givenName', 'telephoneNumber', 'private', 'didNumbers', 'mail', 'attr1', 'attr3', 'attr7');
-        // Envoi de la requête
-        $query = ldap_search($ldap, $this->connectLdapService->getBasePeople(), $filter, $justThese);
-
-        // Récupération des réponses de la requête
-        $info = ldap_get_entries($ldap, $query);
-
-        // Si la personne existe
-        if(count($info) > 0) {
-            // Création d'un tableau vide
-            $entitiesTab = array();
-            for ($i=0; $i < count($info); $i++) { 
-                // Vérifier si ce n'est pas un numéro de chambre
-                if (isset($info[$i]['hierarchysv'])) {
-                    if ($info[$i]['hierarchysv'] != 'PATIENTS/CHIC') {
-                        if (isset($info[$i]['givenname'][0])) {
-                            $entitiesTab[$i] = new Personne(
-                                $info[$i]['givenname'][0],
-                                $info[$i]['sn'][0],
-                                $info[$i]['telephonenumber'][0],
-                                $info[$i]['didnumbers'][0],
-                                $info[$i]['mail'][0],
-                                $info[$i]['attr1'][0],
-                                $info[$i]['attr7'][0],
-                                $info[$i]['attr3'][0],
-                            );
-                            
-                            // Recherche si le numéro est public ou non
-                            $filter2 = '(&(objectClass=numberRecord)(phoneNumber=' . $entitiesTab[$i]->getNumeroCourt() .'))';
-                            $query2 = ldap_search($ldap, $this->connectLdapService->getBasePeople(), $filter2, $justThese);
-                            $reponse2 = ldap_get_entries($ldap, $query2);
-                            if ($reponse2[0]['private'][0] == "LV") {
-                                $entitiesTab[$i]->setNumeroCourt($entitiesTab[$i]->getNumeroCourt());
-                            } else {
-                                $entitiesTab[$i]->setNumeroCourt("Numéro privé");
-                            }
-                        }
-                    } else {
-                        continue;
-                    }
-                } 
+            // Si ce n'est pas une chambre, l'ajouter au tableau
+            if ($personnesTotal[$i]['hierarchysv'][0] != "PATIENTS/CHIC") {
+                $personnes[$i] = $personnesTotal[$i];
             }
-        } else {
-            return array ("Personne inconnue");
         }
-        return $entitiesTab;
+
+        return $personnes;
     }
+
 }

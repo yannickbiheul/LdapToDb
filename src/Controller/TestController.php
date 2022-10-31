@@ -2,11 +2,12 @@
 
 namespace App\Controller;
 
-use App\Service\BatimentManager;
-use App\Service\HopitalManager;
-use App\Service\MetierManager;
-use App\Service\PersonneManager;
 use App\Service\PoleManager;
+use App\Service\MetierManager;
+use App\Service\HopitalManager;
+use App\Service\ServiceManager;
+use App\Service\BatimentManager;
+use App\Service\PersonneManager;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -19,6 +20,7 @@ class TestController extends AbstractController
     private BatimentManager $batimentManager;
     private HopitalManager $hopitalManager;
     private MetierManager $metierManager;
+    private ServiceManager $serviceManager;
 
     /**
      * Constructeur
@@ -28,12 +30,14 @@ class TestController extends AbstractController
                                 PoleManager $poleManager, 
                                 BatimentManager $batimentManager,
                                 HopitalManager $hopitalManager,
-                                MetierManager $metierManager) {
+                                MetierManager $metierManager,
+                                ServiceManager $serviceManager) {
         $this->personneManager = $personneManager;
         $this->poleManager = $poleManager;
         $this->batimentManager = $batimentManager;
         $this->hopitalManager = $hopitalManager;
         $this->metierManager = $metierManager;
+        $this->serviceManager = $serviceManager;
     }
 
     /**
@@ -42,29 +46,24 @@ class TestController extends AbstractController
     #[Route('/test', name: 'app_test')]
     public function index(): Response
     {
-        dd($this->poleManager->listPoles());
-        // Sauvegarder les hôpitaux
-        $this->hopitalManager->saveHopitaux();
-        // Sauvegarder les bâtiments
-        $this->batimentManager->saveBatiments();
-        // Sauvegarder les pôles
-        $this->poleManager->savePoles();
-        // Sauvegarder les métiers
-        $this->metierManager->saveMetiers();
-
-        // dd($this->poleManager->listPoles();
-        // $this->batimentManager->saveBatiments();
-        // dd($this->batimentManager->findHopital("DRM"));
-        // dd($this->hopitalManager->listHopitaux());
+        // // Sauvegarder les hôpitaux
         // $this->hopitalManager->saveHopitaux();
+        // // Sauvegarder les bâtiments
         // $this->batimentManager->saveBatiments();
-        // dd($this->metierManager->listMetiers());
-        // $this->personneManager->listPersonnes();
+        // // Sauvegarder les pôles
+        // $this->poleManager->savePoles();
+        // // Sauvegarder les métiers
+        // $this->metierManager->saveMetiers();
+        // // Sauvegarder les services
+        // $this->serviceManager->saveServices();
+        $this->personneManager->savePersonnes();
         
         return $this->json([
             'hopitaux' => $this->hopitalManager->listHopitaux(),
-            'batiments' => $this->batimentManager->listBatiments(),
-            'poles' => $this->poleManager->listPoles(),
+            // 'batiments' => $this->batimentManager->listBatiments(),
+            // 'poles' => $this->poleManager->listPoles(),
+            // 'métiers' => $this->metierManager->listMetiers(),
+            // 'services' => $this->serviceManager->listServices(),
         ]);
 
     }
