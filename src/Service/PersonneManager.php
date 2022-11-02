@@ -166,7 +166,6 @@ class PersonneManager
         }
 
         $entityManager->flush();
-
     }
 
     /**
