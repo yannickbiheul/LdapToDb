@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Entity\Service;
 use App\Repository\BatimentRepository;
+use App\Repository\HopitalRepository;
 use App\Repository\PoleRepository;
 use App\Service\ConnectLdapService;
 use App\Repository\ServiceRepository;
@@ -20,6 +21,7 @@ class ServiceManager
     private $serviceRepo;
     private $poleRepo;
     private $batimentRepo;
+    private $hopitalRepo;
 
     /**
      * Constructeur
@@ -29,12 +31,14 @@ class ServiceManager
                                 ManagerRegistry $doctrine, 
                                 ServiceRepository $serviceRepo,
                                 PoleRepository $poleRepo,
-                                BatimentRepository $batimentRepo) {
+                                BatimentRepository $batimentRepo,
+                                HopitalRepository $hopitalRepo) {
         $this->connectLdapService = $connectLdapService;
         $this->doctrine = $doctrine;
         $this->serviceRepo = $serviceRepo;
         $this->poleRepo = $poleRepo;
         $this->batimentRepo = $batimentRepo;
+        $this->hopitalRepo = $hopitalRepo;
     }
 
     /**
@@ -146,6 +150,14 @@ class ServiceManager
             } else {
                 $service->setBatiment(null);
             }
+
+            // Configurer son hôpital
+            if ($this->findHopital($service->getNom()) != null) {
+                $hopital = $this->findHopital($service->getNom());
+                $service->setHopital($hopital);
+            } else {
+                $service->setHopital(null);
+            }
             
             // Vérifier qu'il n'existe pas dans la base de données
             $existe = $this->serviceRepo->findBy(["nom" => $service->getNom()]);
@@ -214,6 +226,36 @@ class ServiceManager
         if (in_array('attr6', $batiment[0])) {
             $batiment = $this->batimentRepo->findBy(["nom" => $batiment[0]['attr6'][0]]);
             return $batiment[0];
+        }
+        return null;
+    }
+
+    /**
+     * Trouver l'hôpital du service : 
+     * Retourne Hopital
+     */
+    public function findHopital($nomService) {
+        // Suppression des services dont le nom contient des parenthèses (ldap ne les comprend pas)
+        $pattern = '/\(*\)/';
+        preg_match($pattern, $nomService, $matches);
+        if (count($matches) >= 1) {
+            return null;
+        }
+        // Connexion au Ldap
+        $ldap = $this->connectLdapService->connexionLdap();
+        // Création d'un filtre de requête
+        $filter = '(&(objectClass=peopleRecord)(sn='.$nomService.'))';
+        // Tableau des attributs demandés
+        $justThese = array('sn', 'attr5');
+        // Envoi de la requête
+        $query = ldap_search($ldap, $this->connectLdapService->getBasePeople(), $filter, $justThese);
+        // Récupération des réponses de la requête
+        $hopital = ldap_get_entries($ldap, $query);
+        
+        // Vérifier que l'hôpital' est bien relié à un service
+        if (in_array('attr5', $hopital[0])) {
+            $hopital = $this->hopitalRepo->findBy(["nom" => $hopital[0]['attr5'][0]]);
+            return $hopital[0];
         }
         return null;
     }

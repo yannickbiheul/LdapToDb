@@ -59,6 +59,10 @@ class TestCommand extends Command
         $this->poleManager->savePoles();
         // Sauvegarder les métiers
         $this->metierManager->saveMetiers();
+        // Sauvegarder les services
+        $this->serviceManager->saveServices();
+        // Sauvegarder les personnes
+        $this->personneManager->savePersonnes();
 
         return Command::SUCCESS;
     }

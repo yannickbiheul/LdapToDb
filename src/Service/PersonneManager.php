@@ -154,14 +154,6 @@ class PersonneManager
                 $personne->setPole(null);
             }
 
-            // Configurer son service
-            if ($this->findService($personne->getNom(), $personne->getPrenom()) != null) {
-                $service = $this->findService($personne->getNom(), $personne->getPrenom());
-                $personne->setService($service);
-            } else {
-                $personne->setService(null);
-            }
-
             // Vérifier qu'il n'existe pas dans la base de données
             $existeNom = $this->personneRepo->findBy(["nom" => $personne->getNom()]);
             if (count($existeNom) == 0) {
@@ -269,31 +261,6 @@ class PersonneManager
         if (in_array('attr1', $pole[0])) {
             $pole = $this->poleRepo->findBy(["nom" => $pole[0]['attr1'][0]]);
             return $pole[0];
-        }
-        return null;
-    }
-
-    /**
-     * Trouver le service de la personne : 
-     * Retourne Service
-     */
-    public function findService($nomPersonne, $prenomPersonne) {
-        // Connexion au Ldap
-        $ldap = $this->connectLdapService->connexionLdap();
-        // Création d'un filtre de requête
-        $filter = '(&(sn='.$nomPersonne.')(displayGn='.$prenomPersonne.'))';
-        // Tableau des attributs demandés
-        $justThese = array('attr1');
-        // Envoi de la requête
-        $query = ldap_search($ldap, $this->connectLdapService->getBasePeople(), $filter, $justThese);
-        // Récupération des réponses de la requête
-        $service = ldap_get_entries($ldap, $query);
-        
-        // Vérifier que la personne est bien reliée à un service
-        if (in_array('attr1', $service[0])) {
-            $service = $this->serviceRepo->findBy(["nom" => $service[0]['attr1'][0]]);
-            dd($service);
-            return $service[0];
         }
         return null;
     }

@@ -28,6 +28,9 @@ class Service
     #[ORM\ManyToOne(inversedBy: 'services')]
     private ?Batiment $batiment = null;
 
+    #[ORM\ManyToOne(inversedBy: 'services')]
+    private ?Hopital $hopital = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -89,6 +92,18 @@ class Service
     public function setBatiment(?Batiment $batiment): self
     {
         $this->batiment = $batiment;
+
+        return $this;
+    }
+
+    public function getHopital(): ?Hopital
+    {
+        return $this->hopital;
+    }
+
+    public function setHopital(?Hopital $hopital): self
+    {
+        $this->hopital = $hopital;
 
         return $this;
     }

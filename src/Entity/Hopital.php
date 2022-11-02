@@ -24,10 +24,14 @@ class Hopital
     #[ORM\OneToMany(mappedBy: 'hopital', targetEntity: Personne::class)]
     private Collection $personnes;
 
+    #[ORM\OneToMany(mappedBy: 'hopital', targetEntity: Service::class)]
+    private Collection $services;
+
     public function __construct()
     {
         $this->batiments = new ArrayCollection();
         $this->personnes = new ArrayCollection();
+        $this->services = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -101,6 +105,36 @@ class Hopital
             // set the owning side to null (unless already changed)
             if ($personne->getHopital() === $this) {
                 $personne->setHopital(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Service>
+     */
+    public function getServices(): Collection
+    {
+        return $this->services;
+    }
+
+    public function addService(Service $service): self
+    {
+        if (!$this->services->contains($service)) {
+            $this->services->add($service);
+            $service->setHopital($this);
+        }
+
+        return $this;
+    }
+
+    public function removeService(Service $service): self
+    {
+        if ($this->services->removeElement($service)) {
+            // set the owning side to null (unless already changed)
+            if ($service->getHopital() === $this) {
+                $service->setHopital(null);
             }
         }
 
