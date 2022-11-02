@@ -3,6 +3,8 @@
 namespace App\Service;
 
 use App\Entity\Service;
+use App\Repository\BatimentRepository;
+use App\Repository\PoleRepository;
 use App\Service\ConnectLdapService;
 use App\Repository\ServiceRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -16,6 +18,8 @@ class ServiceManager
     private $connectLdapService;
     private $doctrine;
     private $serviceRepo;
+    private $poleRepo;
+    private $batimentRepo;
 
     /**
      * Constructeur
@@ -23,10 +27,14 @@ class ServiceManager
      */
     public function __construct(ConnectLdapService $connectLdapService, 
                                 ManagerRegistry $doctrine, 
-                                ServiceRepository $serviceRepo) {
+                                ServiceRepository $serviceRepo,
+                                PoleRepository $poleRepo,
+                                BatimentRepository $batimentRepo) {
         $this->connectLdapService = $connectLdapService;
         $this->doctrine = $doctrine;
         $this->serviceRepo = $serviceRepo;
+        $this->poleRepo = $poleRepo;
+        $this->batimentRepo = $batimentRepo;
     }
 
     /**
@@ -122,6 +130,22 @@ class ServiceManager
             // Configurer son nom
             $service->setNom($value['sn'][0]);
             $service->setTelephoneCourt($value['mainlinenumber'][0]);
+
+            // Configurer son pôle
+            if ($this->findPole($service->getNom()) != null) {
+                $pole = $this->findPole($service->getNom());
+                $service->setPole($pole);
+            } else {
+                $service->setPole(null);
+            }
+
+            // Configurer son bâtiment
+            if ($this->findBatiment($service->getNom()) != null) {
+                $batiment = $this->findBatiment($service->getNom());
+                $service->setBatiment($batiment);
+            } else {
+                $service->setBatiment(null);
+            }
             
             // Vérifier qu'il n'existe pas dans la base de données
             $existe = $this->serviceRepo->findBy(["nom" => $service->getNom()]);
@@ -132,6 +156,66 @@ class ServiceManager
         }
 
         $entityManager->flush();
+    }
+
+    /**
+     * Trouver le pôle du service : 
+     * Retourne Pole
+     */
+    public function findPole($nomService) {
+        // Suppression des services dont le nom contient des parenthèses (ldap ne les comprend pas)
+        $pattern = '/\(*\)/';
+        preg_match($pattern, $nomService, $matches);
+        if (count($matches) >= 1) {
+            return null;
+        }
+        // Connexion au Ldap
+        $ldap = $this->connectLdapService->connexionLdap();
+        // Création d'un filtre de requête
+        $filter = '(&(objectClass=peopleRecord)(sn='.$nomService.'))';
+        // Tableau des attributs demandés
+        $justThese = array('attr1');
+        // Envoi de la requête
+        $query = ldap_search($ldap, $this->connectLdapService->getBasePeople(), $filter, $justThese);
+        // Récupération des réponses de la requête
+        $pole = ldap_get_entries($ldap, $query);
+        
+        // Vérifier que le service est bien relié à un pôle
+        if (in_array('attr1', $pole[0])) {
+            $pole = $this->poleRepo->findBy(["nom" => $pole[0]['attr1'][0]]);
+            return $pole[0];
+        }
+        return null;
+    }
+
+    /**
+     * Trouver le bâtiment du service : 
+     * Retourne Batiment
+     */
+    public function findBatiment($nomService) {
+        // Suppression des services dont le nom contient des parenthèses (ldap ne les comprend pas)
+        $pattern = '/\(*\)/';
+        preg_match($pattern, $nomService, $matches);
+        if (count($matches) >= 1) {
+            return null;
+        }
+        // Connexion au Ldap
+        $ldap = $this->connectLdapService->connexionLdap();
+        // Création d'un filtre de requête
+        $filter = '(&(objectClass=peopleRecord)(sn='.$nomService.'))';
+        // Tableau des attributs demandés
+        $justThese = array('sn', 'attr6');
+        // Envoi de la requête
+        $query = ldap_search($ldap, $this->connectLdapService->getBasePeople(), $filter, $justThese);
+        // Récupération des réponses de la requête
+        $batiment = ldap_get_entries($ldap, $query);
+        
+        // Vérifier que le service est bien relié à un bâtiment
+        if (in_array('attr6', $batiment[0])) {
+            $batiment = $this->batimentRepo->findBy(["nom" => $batiment[0]['attr6'][0]]);
+            return $batiment[0];
+        }
+        return null;
     }
 
 }

@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\PoleRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: PoleRepository::class)]
@@ -18,6 +20,18 @@ class Pole
 
     #[ORM\ManyToOne(inversedBy: 'poles')]
     private ?Batiment $batiment = null;
+
+    #[ORM\OneToMany(mappedBy: 'pole', targetEntity: Personne::class)]
+    private Collection $personnes;
+
+    #[ORM\OneToMany(mappedBy: 'pole', targetEntity: Service::class)]
+    private Collection $services;
+
+    public function __construct()
+    {
+        $this->personnes = new ArrayCollection();
+        $this->services = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -48,6 +62,66 @@ class Pole
     public function setBatiment(?Batiment $batiment): self
     {
         $this->batiment = $batiment;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Personne>
+     */
+    public function getPersonnes(): Collection
+    {
+        return $this->personnes;
+    }
+
+    public function addPersonne(Personne $personne): self
+    {
+        if (!$this->personnes->contains($personne)) {
+            $this->personnes->add($personne);
+            $personne->setPole($this);
+        }
+
+        return $this;
+    }
+
+    public function removePersonne(Personne $personne): self
+    {
+        if ($this->personnes->removeElement($personne)) {
+            // set the owning side to null (unless already changed)
+            if ($personne->getPole() === $this) {
+                $personne->setPole(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Service>
+     */
+    public function getServices(): Collection
+    {
+        return $this->services;
+    }
+
+    public function addService(Service $service): self
+    {
+        if (!$this->services->contains($service)) {
+            $this->services->add($service);
+            $service->setPole($this);
+        }
+
+        return $this;
+    }
+
+    public function removeService(Service $service): self
+    {
+        if ($this->services->removeElement($service)) {
+            // set the owning side to null (unless already changed)
+            if ($service->getPole() === $this) {
+                $service->setPole(null);
+            }
+        }
 
         return $this;
     }

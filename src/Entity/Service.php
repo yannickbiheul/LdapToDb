@@ -22,6 +22,12 @@ class Service
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $telephone_long = null;
 
+    #[ORM\ManyToOne(inversedBy: 'services')]
+    private ?Pole $pole = null;
+
+    #[ORM\ManyToOne(inversedBy: 'services')]
+    private ?Batiment $batiment = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -59,6 +65,30 @@ class Service
     public function setTelephoneLong(?string $telephone_long): self
     {
         $this->telephone_long = $telephone_long;
+
+        return $this;
+    }
+
+    public function getPole(): ?Pole
+    {
+        return $this->pole;
+    }
+
+    public function setPole(?Pole $pole): self
+    {
+        $this->pole = $pole;
+
+        return $this;
+    }
+
+    public function getBatiment(): ?Batiment
+    {
+        return $this->batiment;
+    }
+
+    public function setBatiment(?Batiment $batiment): self
+    {
+        $this->batiment = $batiment;
 
         return $this;
     }

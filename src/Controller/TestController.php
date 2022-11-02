@@ -46,25 +46,29 @@ class TestController extends AbstractController
     #[Route('/test', name: 'app_test')]
     public function index(): Response
     {
-        // // Sauvegarder les hôpitaux
-        $this->hopitalManager->saveHopitaux();
-        // // Sauvegarder les bâtiments
-        $this->batimentManager->saveBatiments();
-        // // Sauvegarder les pôles
-        $this->poleManager->savePoles();
-        // // Sauvegarder les métiers
-        $this->metierManager->saveMetiers();
-        // // Sauvegarder les services
-        $this->serviceManager->saveServices();
-        $this->personneManager->savePersonnes();
-        
+
         return $this->json([
-            'personnes' => $this->personneManager->listPersonnes(),
-            // 'batiments' => $this->batimentManager->listBatiments(),
-            // 'poles' => $this->poleManager->listPoles(),
-            // 'métiers' => $this->metierManager->listMetiers(),
-            // 'services' => $this->serviceManager->listServices(),
+            'resultat' => "TOUT VA BIEN !!!",
         ]);
 
+    }
+
+    /**
+     * Stockage des fonctions de tests
+     */
+    public function testTest() {
+
+        // Sauvegarder les hôpitaux
+        $this->hopitalManager->saveHopitaux();
+        // Sauvegarder les bâtiments
+        $this->batimentManager->saveBatiments();
+        // Sauvegarder les pôles
+        $this->poleManager->savePoles();
+        // Sauvegarder les métiers
+        $this->metierManager->saveMetiers();
+        // Sauvegarder les services
+        $this->serviceManager->saveServices();
+        // Sauvegarder les personnes
+        $this->personneManager->savePersonnes();
     }
 }

@@ -4,10 +4,13 @@ namespace App\Service;
 
 use App\Entity\Metier;
 use App\Entity\Personne;
-use App\Repository\HopitalRepository;
+use App\Repository\BatimentRepository;
+use App\Repository\PoleRepository;
 use App\Service\ConnectLdapService;
 use App\Repository\MetierRepository;
+use App\Repository\HopitalRepository;
 use App\Repository\PersonneRepository;
+use App\Repository\ServiceRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -22,6 +25,9 @@ class PersonneManager
     private $doctrine;
     private $personneRepo;
     private $hopitalRepo;
+    private $poleRepo;
+    private $batimentRepo;
+    private $serviceRepo;
 
     /**
      * Constructeur
@@ -31,12 +37,18 @@ class PersonneManager
                                 MetierRepository $metierRepo,
                                 ManagerRegistry $doctrine,
                                 PersonneRepository $personneRepo,
-                                HopitalRepository $hopitalRepo) {
+                                HopitalRepository $hopitalRepo,
+                                PoleRepository $poleRepo,
+                                BatimentRepository $batimentRepo,
+                                ServiceRepository $serviceRepo) {
         $this->connectLdapService = $connectLdapService;
         $this->metierRepo = $metierRepo;
         $this->doctrine = $doctrine;
         $this->personneRepo = $personneRepo;
         $this->hopitalRepo = $hopitalRepo;
+        $this->poleRepo = $poleRepo;
+        $this->batimentRepo = $batimentRepo;
+        $this->serviceRepo = $serviceRepo;
     }
 
     /**
@@ -126,6 +138,30 @@ class PersonneManager
                 $personne->setHopital(null);
             }
 
+            // Configurer son bâtiment
+            if ($this->findBatiment($personne->getNom(), $personne->getPrenom()) != null) {
+                $batiment = $this->findBatiment($personne->getNom(), $personne->getPrenom());
+                $personne->setBatiment($batiment);
+            } else {
+                $personne->setBatiment(null);
+            }
+
+            // Configurer son pôle
+            if ($this->findPole($personne->getNom(), $personne->getPrenom()) != null) {
+                $pole = $this->findPole($personne->getNom(), $personne->getPrenom());
+                $personne->setPole($pole);
+            } else {
+                $personne->setPole(null);
+            }
+
+            // Configurer son service
+            if ($this->findService($personne->getNom(), $personne->getPrenom()) != null) {
+                $service = $this->findService($personne->getNom(), $personne->getPrenom());
+                $personne->setService($service);
+            } else {
+                $personne->setService(null);
+            }
+
             // Vérifier qu'il n'existe pas dans la base de données
             $existeNom = $this->personneRepo->findBy(["nom" => $personne->getNom()]);
             if (count($existeNom) == 0) {
@@ -138,7 +174,7 @@ class PersonneManager
         }
 
         $entityManager->flush();
-        
+
     }
 
     /**
@@ -185,6 +221,79 @@ class PersonneManager
         if (in_array('attr5', $hopital[0])) {
             $hopital = $this->hopitalRepo->findBy(["nom" => $hopital[0]['attr5'][0]]);
             return $hopital[0];
+        }
+        return null;
+    }
+
+    /**
+     * Trouver le bâtiment de la personne : 
+     * Retourne Batiment
+     */
+    public function findBatiment($nomPersonne, $prenomPersonne) {
+        // Connexion au Ldap
+        $ldap = $this->connectLdapService->connexionLdap();
+        // Création d'un filtre de requête
+        $filter = '(&(sn='.$nomPersonne.')(displayGn='.$prenomPersonne.'))';
+        // Tableau des attributs demandés
+        $justThese = array('attr6');
+        // Envoi de la requête
+        $query = ldap_search($ldap, $this->connectLdapService->getBasePeople(), $filter, $justThese);
+        // Récupération des réponses de la requête
+        $batiment = ldap_get_entries($ldap, $query);
+        
+        // Vérifier que la personne est bien reliée à un bâtiment
+        if (in_array('attr6', $batiment[0])) {
+            $batiment = $this->batimentRepo->findBy(["nom" => $batiment[0]['attr6'][0]]);
+            return $batiment[0];
+        }
+        return null;
+    }
+
+    /**
+     * Trouver le pôle de la personne : 
+     * Retourne Pole
+     */
+    public function findPole($nomPersonne, $prenomPersonne) {
+        // Connexion au Ldap
+        $ldap = $this->connectLdapService->connexionLdap();
+        // Création d'un filtre de requête
+        $filter = '(&(sn='.$nomPersonne.')(displayGn='.$prenomPersonne.'))';
+        // Tableau des attributs demandés
+        $justThese = array('attr1');
+        // Envoi de la requête
+        $query = ldap_search($ldap, $this->connectLdapService->getBasePeople(), $filter, $justThese);
+        // Récupération des réponses de la requête
+        $pole = ldap_get_entries($ldap, $query);
+        
+        // Vérifier que la personne est bien reliée à un pôle
+        if (in_array('attr1', $pole[0])) {
+            $pole = $this->poleRepo->findBy(["nom" => $pole[0]['attr1'][0]]);
+            return $pole[0];
+        }
+        return null;
+    }
+
+    /**
+     * Trouver le service de la personne : 
+     * Retourne Service
+     */
+    public function findService($nomPersonne, $prenomPersonne) {
+        // Connexion au Ldap
+        $ldap = $this->connectLdapService->connexionLdap();
+        // Création d'un filtre de requête
+        $filter = '(&(sn='.$nomPersonne.')(displayGn='.$prenomPersonne.'))';
+        // Tableau des attributs demandés
+        $justThese = array('attr1');
+        // Envoi de la requête
+        $query = ldap_search($ldap, $this->connectLdapService->getBasePeople(), $filter, $justThese);
+        // Récupération des réponses de la requête
+        $service = ldap_get_entries($ldap, $query);
+        
+        // Vérifier que la personne est bien reliée à un service
+        if (in_array('attr1', $service[0])) {
+            $service = $this->serviceRepo->findBy(["nom" => $service[0]['attr1'][0]]);
+            dd($service);
+            return $service[0];
         }
         return null;
     }

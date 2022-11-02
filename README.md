@@ -15,3 +15,12 @@
 
     php C:\Users\yannick.biheul\test\bin\console app:test-command 
 
+## Services non reliés :
+Ldap ne comprend pas les parenthèses
+- IDE Nord (C) Reanimation
+- IDE Sud (A) Reanimation
+- IDE Ouest (B) Reanimation
+- 6066 Sec. Endocrinologie | Sec. Rhumato/Infectio (CONS)
+- Sec. Rhumato/Infectio (CONS)
+- Secretariat Dr HUTIN (MIMS)
+- Support IDE Sit (Actipidos)

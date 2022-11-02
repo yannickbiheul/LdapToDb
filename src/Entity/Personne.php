@@ -34,6 +34,12 @@ class Personne
     #[ORM\ManyToOne(inversedBy: 'personnes')]
     private ?Hopital $hopital = null;
 
+    #[ORM\ManyToOne(inversedBy: 'personnes')]
+    private ?Pole $pole = null;
+
+    #[ORM\ManyToOne(inversedBy: 'personnes')]
+    private ?Batiment $batiment = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -119,6 +125,30 @@ class Personne
     public function setHopital(?Hopital $hopital): self
     {
         $this->hopital = $hopital;
+
+        return $this;
+    }
+
+    public function getPole(): ?Pole
+    {
+        return $this->pole;
+    }
+
+    public function setPole(?Pole $pole): self
+    {
+        $this->pole = $pole;
+
+        return $this;
+    }
+
+    public function getBatiment(): ?Batiment
+    {
+        return $this->batiment;
+    }
+
+    public function setBatiment(?Batiment $batiment): self
+    {
+        $this->batiment = $batiment;
 
         return $this;
     }
