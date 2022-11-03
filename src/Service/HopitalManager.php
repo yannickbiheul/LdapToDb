@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Entity\Hopital;
 use App\Repository\HopitalRepository;
+use App\Repository\PeopleRecordRepository;
 use App\Service\ConnectLdapService;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -13,6 +14,8 @@ class HopitalManager
     private $connectLdapService;
     private $doctrine;
     private $hopitalRepo;
+    private $recordManager;
+    private $peopleRecordRepository;
 
     /**
      * Constructeur
@@ -20,38 +23,25 @@ class HopitalManager
      */
     public function __construct(ConnectLdapService $connectLdapService, 
                                 ManagerRegistry $doctrine, 
-                                HopitalRepository $hopitalRepo) {
+                                HopitalRepository $hopitalRepo,
+                                PeopleRecordRepository $peopleRecordRepository) {
         $this->connectLdapService = $connectLdapService;
         $this->doctrine = $doctrine;
         $this->hopitalRepo = $hopitalRepo;
+        $this->peopleRecordRepository = $peopleRecordRepository;
     }
 
-    /**
-     * Lister tous les hôpitaux : 
-     * Retourne array String
-     */
-    public function listHopitaux()
-    {
-        // Connexion au Ldap
-        $ldap = $this->connectLdapService->connexionLdap();
-        // Création d'un filtre de requête
-        $filter = 'objectClass=peopleRecord';
-        // Tableau des attributs demandés
-        $justThese = array('attr5');
-        // Envoi de la requête
-        $query = ldap_search($ldap, $this->connectLdapService->getBasePeople(), $filter, $justThese);
-        // Récupération des réponses de la requête
-        $infos = ldap_get_entries($ldap, $query);
+    public function getHopitaux() {
+        $hopitaux = array();
+        $listPeople = $this->peopleRecordRepository->findAll();
 
-        // Remplissage du tableau de bâtiments
-        $tableau = array();
-        for ($i=0; $i < count($infos); $i++) { 
-            if (isset($infos[$i]['attr5'])) {
-                $tableau[$i] = $infos[$i]['attr5'][0];
-            } 
+        for ($i=0; $i < count($listPeople); $i++) { 
+            if (property_exists($listPeople[$i], 'attr5') && $listPeople[$i]->getAttr5() != null) {
+                array_push($hopitaux, $listPeople[$i]->getAttr5());
+            }
         }
 
-        return array_unique($tableau);
+        return array_unique($hopitaux);
     }
 
     /**
@@ -61,7 +51,7 @@ class HopitalManager
     public function saveHopitaux()
     {
         $entityManager = $this->doctrine->getManager();
-        $listeHopitaux = $this->listHopitaux();
+        $listeHopitaux = $this->getHopitaux();
 
         foreach ($listeHopitaux as $key => $value) {
             // Créer un objet

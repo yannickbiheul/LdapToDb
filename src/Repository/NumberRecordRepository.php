@@ -39,6 +39,17 @@ class NumberRecordRepository extends ServiceEntityRepository
         }
     }
 
+    public function findGreenList(): array
+    {
+        return $this->createQueryBuilder('n')
+                    ->andWhere('n.private = :val')
+                    ->setParameter('val', 'LV')
+                    ->orderBy('n.id', 'ASC')
+                    ->getQuery()
+                    ->getResult()
+                    ;
+    }
+
 //    /**
 //     * @return NumberRecord[] Returns an array of NumberRecord objects
 //     */

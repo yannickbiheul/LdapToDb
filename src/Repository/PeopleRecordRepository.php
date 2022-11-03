@@ -39,6 +39,16 @@ class PeopleRecordRepository extends ServiceEntityRepository
         }
     }
 
+    public function findHopitaux(): array
+    {
+        return $this->createQueryBuilder('p')
+                    ->select('attr5')
+                    ->andWhere('p.attr5 IS NOT NULL')
+                    ->getQuery()
+                    ->getResult()
+                    ;
+    }
+
 //    /**
 //     * @return PeopleRecord[] Returns an array of PeopleRecord objects
 //     */

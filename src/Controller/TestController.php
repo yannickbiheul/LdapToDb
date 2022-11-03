@@ -51,7 +51,7 @@ class TestController extends AbstractController
     public function index(): Response
     {
         
-        $this->recordManager->enregistrerTout();
+        $this->hopitalManager->saveHopitaux();
 
         return $this->json([
             'resultat' => "TOUT VA BIEN !!!",

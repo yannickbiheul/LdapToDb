@@ -4,6 +4,8 @@ namespace App\Service;
 
 use App\Entity\NumberRecord;
 use App\Entity\PeopleRecord;
+use App\Repository\NumberRecordRepository;
+use App\Repository\PeopleRecordRepository;
 use App\Service\ConnectLdapService;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -12,15 +14,21 @@ class RecordManager
     private $ldap;
     private $connectLdapService;
     private $doctrine;
+    private $numberRecord;
+    private $peopleRecordRepository;
 
     /**
      * Constructeur
      * Injection de ConnectLdapService
      */
     public function __construct(ConnectLdapService $connectLdapService, 
-                                ManagerRegistry $doctrine) {
+                                ManagerRegistry $doctrine,
+                                NumberRecordRepository $numberRecord,
+                                PeopleRecordRepository $peopleRecordRepository) {
         $this->connectLdapService = $connectLdapService;
         $this->doctrine = $doctrine;
+        $this->numberRecord = $numberRecord;
+        $this->peopleRecordRepository = $peopleRecordRepository;
     }
 
     /**
@@ -33,7 +41,7 @@ class RecordManager
         // Création d'un filtre de requête
         $filter = '(&(objectClass=peopleRecord)(sn=*))';
         // Tableau des attributs demandés
-        $justThese = array('sn', 'displaygn', 'givenname', 'mainlinenumber', 'didmumbers', 'mail', 'hierarchysv', 'attr1', 'attr5', 'attr6', 'attr7');
+        $justThese = array('sn', 'displaygn', 'givenname', 'mainlinenumber', 'didnumbers', 'mail', 'hierarchysv', 'attr1', 'attr5', 'attr6', 'attr7');
         // Envoi de la requête
         $query = ldap_search($ldap, $this->connectLdapService->getBasePeople(), $filter, $justThese);
         // Récupération des réponses de la requête
@@ -109,7 +117,7 @@ class RecordManager
 
             $entityManager->persist($peopleRecord);
         }
-
+        
         $entityManager->flush();
     }
 
@@ -123,12 +131,11 @@ class RecordManager
         // Création d'un filtre de requête
         $filter = '(&(objectClass=numberRecord)(phonenumber=*))';
         // Tableau des attributs demandés
-        $justThese = array('phonenumber', 'didnumbers', 'private');
+        $justThese = array('phonenumber', 'didnumber', 'private');
         // Envoi de la requête
         $query = ldap_search($ldap, $this->connectLdapService->getBasePeople(), $filter, $justThese);
         // Récupération des réponses de la requête
         $tout = ldap_get_entries($ldap, $query);
-
         return $tout;
     }
 
@@ -147,8 +154,8 @@ class RecordManager
             // PHONE NUMBER
             $numberRecord->setPhoneNumber($listNumberRecord[$i]['phonenumber'][0]);
             // DID NUMBER
-            if (array_key_exists('didnumbers', $listNumberRecord[$i])) {
-                $numberRecord->setDidNumber($listNumberRecord[$i]['didnumbers'][0]);
+            if (array_key_exists('didnumber', $listNumberRecord[$i])) {
+                $numberRecord->setDidNumber($listNumberRecord[$i]['didnumber'][0]);
             } else {
                 $numberRecord->setDidNumber(null);
             }
@@ -167,6 +174,10 @@ class RecordManager
     public function enregistrerTout() {
         $this->enregistrerPeople();
         $this->enregistrerNumber();
+    }
+
+    public function getNumbersGreenList() {
+        return $this->numberRecord->findGreenList();
     }
 
 }
