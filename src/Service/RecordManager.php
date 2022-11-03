@@ -36,6 +36,54 @@ class RecordManager
     }
 
     /**
+     * Liste toutes les entrées du Ldap de l'objectClass "numberRecord"
+     * Retourne array "listNumberRecords"
+     */
+    public function listNumberRecord() {
+        // Connexion au Ldap
+        $ldap = $this->connectLdapService->connexionLdap();
+        // Création d'un filtre de requête
+        $filter = '(&(objectClass=numberRecord)(phonenumber=*))';
+        // Tableau des attributs demandés
+        $justThese = array('phonenumber', 'didnumber', 'private');
+        // Envoi de la requête
+        $query = ldap_search($ldap, $this->connectLdapService->getBasePeople(), $filter, $justThese);
+        // Récupération des réponses de la requête
+        $listNumberRecords = ldap_get_entries($ldap, $query);
+
+        return $listNumberRecords;
+    }
+
+    /**
+     * Enregistre toutes les entrées du Ldap de l'objectClass "peopleRecord"
+     */
+    public function enregistrerNumber() {
+        $listNumberRecord = $this->listNumberRecord();
+        $entityManager = $this->doctrine->getManager();
+
+        // NUMBER RECORD
+        for ($i=0; $i < count($listNumberRecord)-1; $i++) { 
+            // création d'un objet
+            $numberRecord = new NumberRecord();
+
+            // PHONE NUMBER
+            $numberRecord->setPhoneNumber($listNumberRecord[$i]['phonenumber'][0]);
+            // DID NUMBER
+            if (array_key_exists('didnumber', $listNumberRecord[$i])) {
+                $numberRecord->setDidNumber($listNumberRecord[$i]['didnumber'][0]);
+            } else {
+                $numberRecord->setDidNumber(null);
+            }
+            // PRIVATE
+            $numberRecord->setPrivate($listNumberRecord[$i]['private'][0]);
+
+            $entityManager->persist($numberRecord);
+        }
+
+        $entityManager->flush();
+    }
+
+    /**
      * Liste toutes les entrées du Ldap de l'objectClass "peopleRecord"
      * Retourne array "listPeopleRecords"
      */
@@ -63,6 +111,7 @@ class RecordManager
     */
     public function enregistrerPeople() {
         $listPeopleRecord = $this->listPeopleRecord();
+        $listNumberRecord = $this->listNumberRecord();
         $entityManager = $this->doctrine->getManager();
 
         // PEOPLE RECORD
@@ -125,58 +174,16 @@ class RecordManager
                     $peopleRecord->setAttr7(null);
                 }
 
-                $entityManager->persist($peopleRecord);
+                // Contrainte n°2: pas de numéro sur liste rouge
+                for ($i=0; $i < count($listNumberRecord); $i++) { 
+                    if ($peopleRecord->getMainLineNumber() == $listNumberRecord[$i]['mainlinenumber'][0] && 
+                        $listNumberRecord[$i]['private'][0] != 'LR') {
+                        $entityManager->persist($peopleRecord);
+                    }
+                }
             }     
         }
         
-        $entityManager->flush();
-    }
-
-    /**
-     * Liste toutes les entrées du Ldap de l'objectClass "numberRecord"
-     * Retourne array "listNumberRecords"
-     */
-    public function listNumberRecord() {
-        // Connexion au Ldap
-        $ldap = $this->connectLdapService->connexionLdap();
-        // Création d'un filtre de requête
-        $filter = '(&(objectClass=numberRecord)(phonenumber=*))';
-        // Tableau des attributs demandés
-        $justThese = array('phonenumber', 'didnumber', 'private');
-        // Envoi de la requête
-        $query = ldap_search($ldap, $this->connectLdapService->getBasePeople(), $filter, $justThese);
-        // Récupération des réponses de la requête
-        $listNumberRecords = ldap_get_entries($ldap, $query);
-
-        return $listNumberRecords;
-    }
-
-    /**
-     * Enregistre toutes les entrées du Ldap de l'objectClass "peopleRecord"
-     */
-    public function enregistrerNumber() {
-        $listNumberRecord = $this->listNumberRecord();
-        $entityManager = $this->doctrine->getManager();
-
-        // NUMBER RECORD
-        for ($i=0; $i < count($listNumberRecord)-1; $i++) { 
-            // création d'un objet
-            $numberRecord = new NumberRecord();
-
-            // PHONE NUMBER
-            $numberRecord->setPhoneNumber($listNumberRecord[$i]['phonenumber'][0]);
-            // DID NUMBER
-            if (array_key_exists('didnumber', $listNumberRecord[$i])) {
-                $numberRecord->setDidNumber($listNumberRecord[$i]['didnumber'][0]);
-            } else {
-                $numberRecord->setDidNumber(null);
-            }
-            // PRIVATE
-            $numberRecord->setPrivate($listNumberRecord[$i]['private'][0]);
-
-            $entityManager->persist($numberRecord);
-        }
-
         $entityManager->flush();
     }
 
