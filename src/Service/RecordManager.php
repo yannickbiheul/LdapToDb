@@ -109,9 +109,8 @@ class RecordManager
     /**
      * Enregistre toutes les entrées du Ldap de l'objectClass "peopleRecord"
      * Transforme ces entrées en objets, 
-     * Applique les contraintes : 
-     * Pas de numéros de chambres, 
-     * Pas de numéro en liste rouge
+     * Applique la contrainte n°2 : 
+     * Pas de numéros de chambres
     */
     public function enregistrerPeople() {
         $listPeopleRecord = $this->listPeopleRecord();
@@ -123,7 +122,7 @@ class RecordManager
             // création d'un objet
             $peopleRecord = new PeopleRecord();
 
-            // Contrainte n°1: pas de numéros de chambres
+            // Contrainte n°2: pas de numéros de chambres
             if ($listPeopleRecord[$i]['hierarchysv'][0] != "PATIENTS/CHIC") {
                 // SN
                 $peopleRecord->setSn($listPeopleRecord[$i]['sn'][0]);
@@ -176,14 +175,6 @@ class RecordManager
                     $peopleRecord->setAttr7($listPeopleRecord[$i]['attr7'][0]);
                 } else {
                     $peopleRecord->setAttr7(null);
-                }
-
-                // Contrainte n°2: pas de numéro sur liste rouge
-                for ($i=0; $i < count($listNumberRecord); $i++) { 
-                    if ($peopleRecord->getMainLineNumber() == $listNumberRecord[$i]['mainlinenumber'][0] && 
-                        $listNumberRecord[$i]['private'][0] != 'LR') {
-                        $entityManager->persist($peopleRecord);
-                    }
                 }
             }     
         }
