@@ -2,16 +2,20 @@
 
 namespace App\Service;
 
+use App\Entity\Entree;
 use App\Entity\Metier;
 use App\Entity\Personne;
-use App\Repository\BatimentRepository;
+use App\Entity\PeopleRecord;
 use App\Repository\PoleRepository;
 use App\Service\ConnectLdapService;
+use App\Repository\EntreeRepository;
 use App\Repository\MetierRepository;
 use App\Repository\HopitalRepository;
-use App\Repository\PersonneRepository;
 use App\Repository\ServiceRepository;
+use App\Repository\BatimentRepository;
+use App\Repository\PersonneRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use App\Repository\PeopleRecordRepository;
 
 /**
  * Contrainte n°1 : Ne pas afficher les lignes rouges
@@ -28,6 +32,7 @@ class PersonneManager
     private $poleRepo;
     private $batimentRepo;
     private $serviceRepo;
+    private $peopleRecordRepo;
 
     /**
      * Constructeur
@@ -40,7 +45,8 @@ class PersonneManager
                                 HopitalRepository $hopitalRepo,
                                 PoleRepository $poleRepo,
                                 BatimentRepository $batimentRepo,
-                                ServiceRepository $serviceRepo) {
+                                ServiceRepository $serviceRepo,
+                                PeopleRecordRepository $peopleRecordRepo) {
         $this->connectLdapService = $connectLdapService;
         $this->metierRepo = $metierRepo;
         $this->doctrine = $doctrine;
@@ -49,6 +55,7 @@ class PersonneManager
         $this->poleRepo = $poleRepo;
         $this->batimentRepo = $batimentRepo;
         $this->serviceRepo = $serviceRepo;
+        $this->peopleRecordRepo = $peopleRecordRepo;
     }
 
     /**
@@ -62,7 +69,7 @@ class PersonneManager
         // Création d'un filtre de requête
         $filter = '(&(objectClass=peopleRecord)(sn=*))';
         // Tableau des attributs demandés
-        $justThese = array('hierarchySV', 'sn', 'givenName', 'displayGn', 'mainLineNumber', 'didNumbers', 'mail', 'attr1', 'attr3', 'attr5', 'attr7', 'cleUid');
+        $justThese = array('hierarchySV', 'sn', 'displayGn', 'mainLineNumber', 'didNumbers', 'mail', 'attr1', 'attr5', 'attr6', 'attr7');
         // Envoi de la requête
         $query = ldap_search($ldap, $this->connectLdapService->getBasePeople(), $filter, $justThese);
         // Récupération des réponses de la requête
@@ -79,17 +86,13 @@ class PersonneManager
                     array_push($personnesInGreenList, $personne);
                 } 
             }
-            
         }
 
         // Séparer les personnes et les services
         $personnes = array();
-        $services = array();
         foreach ($personnesInGreenList as $personne) {
-            if ($personne['givenname'][0] != " " || $personne['givenname'][0] == null) {
+            if ($personne['displayGn'][0] != " " || $personne['displayGn'][0] == null) {
                 array_push($personnes, $personne);
-            } else {
-                array_push($services, $personne);
             }
         }
 
@@ -107,6 +110,7 @@ class PersonneManager
         foreach($listePersonnes as $key => $value) {
             // Créer un objet
             $personne = new Personne();
+
             // Hydrater l'objet
             $personne->setNom($value['sn'][0]);
             $personne->setPrenom($value['displaygn'][0]);
@@ -164,7 +168,7 @@ class PersonneManager
                 } 
             }
         }
-
+        
         $entityManager->flush();
     }
 
