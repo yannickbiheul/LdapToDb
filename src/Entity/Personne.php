@@ -20,13 +20,7 @@ class Personne
     private ?string $nom = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $mail = null;
-
-    #[ORM\Column(length: 255)]
     private ?string $telephone_court = null;
-
-    #[ORM\Column(length: 255)]
-    private ?string $telephone_long = null;
 
     #[ORM\ManyToOne(inversedBy: 'personnes')]
     private ?Metier $metier = null;
@@ -39,6 +33,12 @@ class Personne
 
     #[ORM\ManyToOne(inversedBy: 'personnes')]
     private ?Batiment $batiment = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $telephone_long = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $mail = null;
 
     public function getId(): ?int
     {
@@ -69,18 +69,6 @@ class Personne
         return $this;
     }
 
-    public function getMail(): ?string
-    {
-        return $this->mail;
-    }
-
-    public function setMail(string $mail): self
-    {
-        $this->mail = $mail;
-
-        return $this;
-    }
-
     public function getTelephoneCourt(): ?string
     {
         return $this->telephone_court;
@@ -89,18 +77,6 @@ class Personne
     public function setTelephoneCourt(string $telephone_court): self
     {
         $this->telephone_court = $telephone_court;
-
-        return $this;
-    }
-
-    public function getTelephoneLong(): ?string
-    {
-        return $this->telephone_long;
-    }
-
-    public function setTelephoneLong(string $telephone_long): self
-    {
-        $this->telephone_long = $telephone_long;
 
         return $this;
     }
@@ -149,6 +125,30 @@ class Personne
     public function setBatiment(?Batiment $batiment): self
     {
         $this->batiment = $batiment;
+
+        return $this;
+    }
+
+    public function getTelephoneLong(): ?string
+    {
+        return $this->telephone_long;
+    }
+
+    public function setTelephoneLong(?string $telephone_long): self
+    {
+        $this->telephone_long = $telephone_long;
+
+        return $this;
+    }
+
+    public function getMail(): ?string
+    {
+        return $this->mail;
+    }
+
+    public function setMail(?string $mail): self
+    {
+        $this->mail = $mail;
 
         return $this;
     }

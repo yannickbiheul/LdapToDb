@@ -113,13 +113,13 @@ class PersonneManager
             if (in_array('mail', $value)) {
                 $personne->setMail($value['mail'][0]);
             } else {
-                $personne->setMail("pas de mail");
+                $personne->setMail(null);
             }
             $personne->setTelephoneCourt($value['mainlinenumber'][0]);
             if (in_array('didnumbers', $value)) {
                 $personne->setTelephoneLong($value['didnumbers'][0]);
             } else {
-                $personne->setTelephoneLong("pas de numéro long");
+                $personne->setTelephoneLong(null);
             }
             
             // Configurer son métier

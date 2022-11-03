@@ -47,25 +47,6 @@ class TestController extends AbstractController
     public function index(): Response
     {
         
-        // Sauvegarder les métiers
-        $this->metierManager->saveMetiers();
-        // Sauvegarder les services
-        $this->serviceManager->saveServices();
-        // Sauvegarder les personnes
-        $this->personneManager->savePersonnes();
-
-        return $this->json([
-            'resultat' => "TOUT VA BIEN !!!",
-        ]);
-
-    }
-
-    /**
-     * Fonction partie 1
-     */
-    #[Route('/un', name: 'app_un')]
-    public function un(): Response
-    {
         // Sauvegarder les hôpitaux
         $this->hopitalManager->saveHopitaux();
         // Sauvegarder les bâtiments
@@ -74,18 +55,6 @@ class TestController extends AbstractController
         $this->poleManager->savePoles();
         // Sauvegarder les métiers
         $this->metierManager->saveMetiers();
-
-        return $this->json([
-            'resultat' => "TOUT VA BIEN !!!",
-        ]);
-    }
-
-    /**
-     * Fonction partie 2
-     */
-    #[Route('/deux', name: 'app_deux')]
-    public function deux(): Response
-    {
         // Sauvegarder les services
         $this->serviceManager->saveServices();
         // Sauvegarder les personnes
@@ -94,6 +63,7 @@ class TestController extends AbstractController
         return $this->json([
             'resultat' => "TOUT VA BIEN !!!",
         ]);
+
     }
 
     /**
