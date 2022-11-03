@@ -15,6 +15,13 @@
 
     php C:\Users\yannick.biheul\test\bin\console app:test-command 
 
+- 4 éléments à récupérer de l'annuaire :
+    - contact
+    - number
+    - people
+- N'enregistre pas les numéros de liste rouge
+- N'enregistre pas les numéros de chambres
+
 ## Services non reliés :
 Ldap ne comprend pas les parenthèses
 - IDE Nord (C) Reanimation

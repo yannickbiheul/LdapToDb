@@ -11,6 +11,7 @@ use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * Récupère toutes les données de l'annuaire, 
+ * Transforme ces données en objets, 
  * Applique les contraintes
  */
 class RecordManager
@@ -23,7 +24,7 @@ class RecordManager
 
     /**
      * Constructeur
-     * Injection de ConnectLdapService
+     * 
      */
     public function __construct(ConnectLdapService $connectLdapService, 
                                 ManagerRegistry $doctrine,
@@ -37,7 +38,7 @@ class RecordManager
 
     /**
      * Liste toutes les entrées du Ldap de l'objectClass "numberRecord"
-     * Retourne array "listNumberRecords"
+     * Retourne tableau de tableau "listNumberRecords"
      */
     public function listNumberRecord() {
         // Connexion au Ldap
@@ -55,7 +56,8 @@ class RecordManager
     }
 
     /**
-     * Enregistre toutes les entrées du Ldap de l'objectClass "peopleRecord"
+     * Enregistre toutes les entrées du Ldap de l'objectClass "peopleRecord" 
+     * Applique la contrainte n!)1: pas de numéros de liste rouge
      */
     public function enregistrerNumber() {
         $listNumberRecord = $this->listNumberRecord();
@@ -63,21 +65,23 @@ class RecordManager
 
         // NUMBER RECORD
         for ($i=0; $i < count($listNumberRecord)-1; $i++) { 
-            // création d'un objet
-            $numberRecord = new NumberRecord();
 
-            // PHONE NUMBER
-            $numberRecord->setPhoneNumber($listNumberRecord[$i]['phonenumber'][0]);
-            // DID NUMBER
-            if (array_key_exists('didnumber', $listNumberRecord[$i])) {
-                $numberRecord->setDidNumber($listNumberRecord[$i]['didnumber'][0]);
-            } else {
-                $numberRecord->setDidNumber(null);
+            if ($listNumberRecord[$i]['private'][0] != 'LR') {
+                // création d'un objet
+                $numberRecord = new NumberRecord();
+                // PHONE NUMBER
+                $numberRecord->setPhoneNumber($listNumberRecord[$i]['phonenumber'][0]);
+                // DID NUMBER
+                if (array_key_exists('didnumber', $listNumberRecord[$i])) {
+                    $numberRecord->setDidNumber($listNumberRecord[$i]['didnumber'][0]);
+                } else {
+                    $numberRecord->setDidNumber(null);
+                }
+                // PRIVATE
+                $numberRecord->setPrivate($listNumberRecord[$i]['private'][0]);
+
+                $entityManager->persist($numberRecord);
             }
-            // PRIVATE
-            $numberRecord->setPrivate($listNumberRecord[$i]['private'][0]);
-
-            $entityManager->persist($numberRecord);
         }
 
         $entityManager->flush();
