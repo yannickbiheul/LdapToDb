@@ -45,9 +45,9 @@ class RecordManager
         // Envoi de la requête
         $query = ldap_search($ldap, $this->connectLdapService->getBasePeople(), $filter, $justThese);
         // Récupération des réponses de la requête
-        $listPeopleRecord = ldap_get_entries($ldap, $query);
+        $listPeopleRecords = ldap_get_entries($ldap, $query);
 
-        return $listPeopleRecord;
+        return $listPeopleRecords;
     }
 
     /**
@@ -62,60 +62,64 @@ class RecordManager
             // création d'un objet
             $peopleRecord = new PeopleRecord();
 
-            // SN
-            $peopleRecord->setSn($listPeopleRecord[$i]['sn'][0]);
-            // DISPLAY GN
-            if ($listPeopleRecord[$i]['displaygn'][0] != " " && $listPeopleRecord[$i]['displaygn'][0] != null) {
-                $peopleRecord->setDisplayGn($listPeopleRecord[$i]['displaygn'][0]);
-            } else {
-                $peopleRecord->setDisplayGn(null);
-            }
-            // MAIN LINE NUMBER
-            if (array_key_exists('mainlinenumber', $listPeopleRecord[$i])) {
-                $peopleRecord->setMainLineNumber($listPeopleRecord[$i]['mainlinenumber'][0]);
-            } else {
-                $peopleRecord->setMainLineNumber(null);
-            }
-            // DID NUMBERS
-            if (array_key_exists('didnumbers', $listPeopleRecord[$i])) {
-                $peopleRecord->setDidNumbers($listPeopleRecord[$i]['didnumbers'][0]);
-            } else {
-                $peopleRecord->setDidNumbers(null);
-            }
-            // MAIL
-            if (array_key_exists('mail', $listPeopleRecord[$i])) {
-                $peopleRecord->setMail($listPeopleRecord[$i]['mail'][0]);
-            } else {
-                $peopleRecord->setMail(null);
-            }
-            // HIERARCHY SV
-            $peopleRecord->setHierarchySV($listPeopleRecord[$i]['hierarchysv'][0]);
-            // ATTR 1
-            if (array_key_exists('attr1', $listPeopleRecord[$i])) {
-                $peopleRecord->setAttr1($listPeopleRecord[$i]['attr1'][0]);
-            } else {
-                $peopleRecord->setAttr1(null);
-            }
-            // ATTR 5
-            if (array_key_exists('attr5', $listPeopleRecord[$i])) {
-                $peopleRecord->setAttr5($listPeopleRecord[$i]['attr5'][0]);
-            } else {
-                $peopleRecord->setAttr5(null);
-            }
-            // ATTR 6
-            if (array_key_exists('attr6', $listPeopleRecord[$i])) {
-                $peopleRecord->setAttr6($listPeopleRecord[$i]['attr6'][0]);
-            } else {
-                $peopleRecord->setAttr6(null);
-            }
-            // ATTR 7
-            if (array_key_exists('attr7', $listPeopleRecord[$i])) {
-                $peopleRecord->setAttr7($listPeopleRecord[$i]['attr7'][0]);
-            } else {
-                $peopleRecord->setAttr7(null);
-            }
+            // Suppression des numéros de chambres
+            if ($listPeopleRecord[$i]['hierarchysv'][0] != "PATIENTS/CHIC") {
+                // SN
+                $peopleRecord->setSn($listPeopleRecord[$i]['sn'][0]);
+                // DISPLAY GN
+                if ($listPeopleRecord[$i]['displaygn'][0] != " " && $listPeopleRecord[$i]['displaygn'][0] != null) {
+                    $peopleRecord->setDisplayGn($listPeopleRecord[$i]['displaygn'][0]);
+                } else {
+                    $peopleRecord->setDisplayGn(null);
+                }
+                // MAIN LINE NUMBER
+                if (array_key_exists('mainlinenumber', $listPeopleRecord[$i])) {
+                    $peopleRecord->setMainLineNumber($listPeopleRecord[$i]['mainlinenumber'][0]);
+                } else {
+                    $peopleRecord->setMainLineNumber(null);
+                }
+                // DID NUMBERS
+                if (array_key_exists('didnumbers', $listPeopleRecord[$i])) {
+                    $peopleRecord->setDidNumbers($listPeopleRecord[$i]['didnumbers'][0]);
+                } else {
+                    $peopleRecord->setDidNumbers(null);
+                }
+                // MAIL
+                if (array_key_exists('mail', $listPeopleRecord[$i])) {
+                    $peopleRecord->setMail($listPeopleRecord[$i]['mail'][0]);
+                } else {
+                    $peopleRecord->setMail(null);
+                }
+                // HIERARCHY SV
+                $peopleRecord->setHierarchySV($listPeopleRecord[$i]['hierarchysv'][0]);
+                // ATTR 1
+                if (array_key_exists('attr1', $listPeopleRecord[$i])) {
+                    $peopleRecord->setAttr1($listPeopleRecord[$i]['attr1'][0]);
+                } else {
+                    $peopleRecord->setAttr1(null);
+                }
+                // ATTR 5
+                if (array_key_exists('attr5', $listPeopleRecord[$i])) {
+                    $peopleRecord->setAttr5($listPeopleRecord[$i]['attr5'][0]);
+                } else {
+                    $peopleRecord->setAttr5(null);
+                }
+                // ATTR 6
+                if (array_key_exists('attr6', $listPeopleRecord[$i])) {
+                    $peopleRecord->setAttr6($listPeopleRecord[$i]['attr6'][0]);
+                } else {
+                    $peopleRecord->setAttr6(null);
+                }
+                // ATTR 7
+                if (array_key_exists('attr7', $listPeopleRecord[$i])) {
+                    $peopleRecord->setAttr7($listPeopleRecord[$i]['attr7'][0]);
+                } else {
+                    $peopleRecord->setAttr7(null);
+                }
 
-            $entityManager->persist($peopleRecord);
+                $entityManager->persist($peopleRecord);
+            }
+            
         }
         
         $entityManager->flush();
@@ -135,8 +139,9 @@ class RecordManager
         // Envoi de la requête
         $query = ldap_search($ldap, $this->connectLdapService->getBasePeople(), $filter, $justThese);
         // Récupération des réponses de la requête
-        $tout = ldap_get_entries($ldap, $query);
-        return $tout;
+        $listNumberRecords = ldap_get_entries($ldap, $query);
+
+        return $listNumberRecords;
     }
 
     /**
