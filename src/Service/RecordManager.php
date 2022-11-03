@@ -9,6 +9,10 @@ use App\Repository\PeopleRecordRepository;
 use App\Service\ConnectLdapService;
 use Doctrine\Persistence\ManagerRegistry;
 
+/**
+ * Récupère toutes les données de l'annuaire, 
+ * Applique les contraintes
+ */
 class RecordManager
 {
     private $ldap;
@@ -33,7 +37,7 @@ class RecordManager
 
     /**
      * Liste toutes les entrées du Ldap de l'objectClass "peopleRecord"
-     * Retourne Entree
+     * Retourne array "listPeopleRecords"
      */
     public function listPeopleRecord() {
         // Connexion au Ldap
@@ -52,6 +56,10 @@ class RecordManager
 
     /**
      * Enregistre toutes les entrées du Ldap de l'objectClass "peopleRecord"
+     * Transforme ces entrées en objets, 
+     * Applique les contraintes : 
+     * Pas de numéros de chambres, 
+     * Pas de numéro en liste rouge
     */
     public function enregistrerPeople() {
         $listPeopleRecord = $this->listPeopleRecord();
@@ -62,7 +70,7 @@ class RecordManager
             // création d'un objet
             $peopleRecord = new PeopleRecord();
 
-            // Suppression des numéros de chambres
+            // Contrainte n°1: pas de numéros de chambres
             if ($listPeopleRecord[$i]['hierarchysv'][0] != "PATIENTS/CHIC") {
                 // SN
                 $peopleRecord->setSn($listPeopleRecord[$i]['sn'][0]);
@@ -118,8 +126,7 @@ class RecordManager
                 }
 
                 $entityManager->persist($peopleRecord);
-            }
-            
+            }     
         }
         
         $entityManager->flush();
@@ -127,7 +134,7 @@ class RecordManager
 
     /**
      * Liste toutes les entrées du Ldap de l'objectClass "numberRecord"
-     * Retourne Entree
+     * Retourne array "listNumberRecords"
      */
     public function listNumberRecord() {
         // Connexion au Ldap
