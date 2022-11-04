@@ -43,7 +43,7 @@ class HopitalManager
     }
 
     /**
-     * Enregistre les hopitaux dans la bdd
+     * Enregistrer les hopitaux dans la bdd
      * 
      */
     public function enregistrerHopitaux() {

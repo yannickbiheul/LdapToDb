@@ -51,7 +51,7 @@ class TestController extends AbstractController
     public function index(): Response
     {
         // enregistrement des bâtiments
-        $this->batimentManager->enregistrerBatiments();
+        $this->poleManager->enregistrerPoles();
 
         return $this->json([
             'resultat' => "TOUT VA BIEN !!!",
@@ -64,9 +64,13 @@ class TestController extends AbstractController
      */
     public function testTest() {
 
-        // Enregistrement de toutes les donénes "peopleRecord"
+        // Enregistrement de toutes les données "peopleRecord"
         $this->recordManager->enregistrerTout();
-        // Enregistrement des h$opitaux
+        // Enregistrement des hôpitaux
         $this->hopitalManager->enregistrerHopitaux();
+        // Enregistrement des bâtiments
+        $this->batimentManager->enregistrerBatiments();
+        // Enregistrer les pôles
+        $this->poleManager->enregistrerPoles();
     }
 }
