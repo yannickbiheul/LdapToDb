@@ -3,10 +3,11 @@
 namespace App\Service;
 
 use App\Entity\Pole;
-use App\Repository\BatimentRepository;
-use App\Repository\PeopleRecordRepository;
+use App\Entity\Batiment;
 use App\Repository\PoleRepository;
+use App\Repository\BatimentRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use App\Repository\PeopleRecordRepository;
 
 class PoleManager
 {
@@ -34,28 +35,18 @@ public function __construct(ManagerRegistry $doctrine,
      * Retourne tableau de string
      */
     public function getPoles() {
-        $poles = array();
+        $tousLesPoles = array();
         $listPeople = $this->peopleRecordRepo->findAll();
-        
+
         for ($i=0; $i < count($listPeople); $i++) { 
             if (property_exists($listPeople[$i], 'attr1') && $listPeople[$i]->getAttr1() != null) {
-                $tableau = array();
-                // Ajouter le pôle
-                array_push($tableau, $listPeople[$i]->getAttr1());
-                // Ajouter le bâtiment
-                array_push($tableau, $listPeople[$i]->getAttr6());
-                array_push($poles, $tableau);
+                array_push($tousLesPoles, $listPeople[$i]->getAttr1());
             }
         }
-        $test = array();
-        foreach ($poles as $key => $value) {
-            
-            if (!in_array($value, $test)) {
-                array_push($test, $value);
-            }
-        }
+
+        $poles = array_unique($tousLesPoles);
         
-        return $test;
+        return array_unique($poles);
     }
 
     /**
@@ -65,20 +56,29 @@ public function __construct(ManagerRegistry $doctrine,
     public function enregistrerPoles() {
         $entityManager = $this->doctrine->getManager();
         $listPoles = $this->getPoles();
-       
+        
         foreach ($listPoles as $key => $value) { 
-            $pole = new Pole();
             
             // Vérifier que le pôle n'existe pas dans la bdd
-            if ($this->poleRepo->findOneBy(['nom' => $listPoles[$key][0]]) == null) {
-                $batiment = $this->batimentRepo->findOneBy(['nom' => $listPoles[$key][1]]);
-                $pole->setNom($listPoles[$key][0]);
-                $pole->setbatiment($batiment);
+            if ($this->batimentRepo->findOneBy(['nom' => $listPoles[$key]]) == null) {
+                // Création de l'objet
+                $pole = new Pole();
+                $pole->setNom($listPoles[$key]);
+
+                // Voir s'il existe un bâtiment pour ce pôle
+                $nomBatiment = $this->peopleRecordRepo->findOneBy(['attr1' => $listPoles[$key]])->getAttr6();
+                
+                if ($this->batimentRepo->findOneBy(['nom' => $nomBatiment]) != null) {
+                    $batiment = $this->batimentRepo->findOneBy(['nom' => $nomBatiment]);
+                    $pole->setBatiment($batiment);
+                } else {
+                    $pole->setBatiment(null);
+                }
+
                 $entityManager->persist($pole);
             }
-
-            $entityManager->flush();
         }
-    }
 
+        $entityManager->flush();
+    }
 }

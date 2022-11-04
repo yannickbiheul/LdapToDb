@@ -61,4 +61,8 @@ class HopitalManager
         $entityManager->flush();
     }
 
+    public function voirHopitaux() {
+        return $this->hopitalRepo->findAll();
+    }
+
 }

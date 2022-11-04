@@ -2,11 +2,12 @@
 
 namespace App\Service;
 
+use App\Entity\Hopital;
 use App\Entity\Batiment;
-use App\Repository\BatimentRepository;
 use App\Repository\HopitalRepository;
-use App\Repository\PeopleRecordRepository;
+use App\Repository\BatimentRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use App\Repository\PeopleRecordRepository;
 
 class BatimentManager
 {
@@ -34,26 +35,18 @@ class BatimentManager
      * Retourne tableau de string
      */
     public function getBatiments() {
-        $batiments = array();
+        $tousLesBatiments = array();
         $listPeople = $this->peopleRecordRepo->findAll();
-        
+
         for ($i=0; $i < count($listPeople); $i++) { 
             if (property_exists($listPeople[$i], 'attr6') && $listPeople[$i]->getAttr6() != null) {
-                $tableau = array();
-                array_push($tableau, $listPeople[$i]->getAttr6());
-                array_push($tableau, $listPeople[$i]->getAttr5());
-                array_push($batiments, $tableau);
+                array_push($tousLesBatiments, $listPeople[$i]->getAttr6());
             }
         }
-        $test = array();
-        foreach ($batiments as $key => $value) {
-            
-            if (!in_array($value, $test)) {
-                array_push($test, $value);
-            }
-        }
+
+        $batiments = array_unique($tousLesBatiments);
         
-        return $test;
+        return array_unique($batiments);
     }
 
     /**
@@ -63,20 +56,34 @@ class BatimentManager
     public function enregistrerBatiments() {
         $entityManager = $this->doctrine->getManager();
         $listBatiments = $this->getBatiments();
-       
+        
         foreach ($listBatiments as $key => $value) { 
-            $batiment = new Batiment();
             
             // Vérifier que le bâtiment n'existe pas dans la bdd
-            if ($this->batimentRepo->findOneBy(['nom' => $listBatiments[$key][0]]) == null) {
-                $hopital = $this->hopitalRepo->findOneBy(['nom' => $listBatiments[$key][1]]);
-                $batiment->setNom($listBatiments[$key][0]);
-                $batiment->setHopital($hopital);
+            if ($this->batimentRepo->findOneBy(['nom' => $listBatiments[$key]]) == null) {
+                // Création de l'objet
+                $batiment = new Batiment();
+                $batiment->setNom($listBatiments[$key]);
+
+                // Voir s'il existe un hopital pour ce batiment
+                $nomHopital = $this->peopleRecordRepo->findOneBy(['attr6' => $listBatiments[$key]])->getAttr5();
+                
+                if ($this->hopitalRepo->findOneBy(['nom' => $nomHopital]) != null) {
+                    $hopital = $this->hopitalRepo->findOneBy(['nom' => $nomHopital]);
+                    $batiment->setHopital($hopital);
+                } else {
+                    $batiment->setHopital(null);
+                }
+
                 $entityManager->persist($batiment);
             }
-
-            $entityManager->flush();
         }
+
+        $entityManager->flush();
+    }
+
+    public function voirBatiments() {
+        return $this->batimentRepo->findAll();
     }
 
 }
