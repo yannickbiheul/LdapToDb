@@ -63,6 +63,27 @@ class PersonneManager
     }
 
     /**
+     * Récupérer la liste des personnes 
+     * Retourne tableau de string
+     */
+    public function getPersonnes() {
+        $personnes = array();
+        $listPeople = $this->peopleRecordRepo->findAll();
+
+        for ($i=0; $i < count($listPeople); $i++) { 
+            
+            if ($listPeople[$i]->getSn() != null && $listPeople[$i]->getDisplayGn() != null) {
+                $tableau = array();
+                array_push($tableau, $listPeople[$i]->getSn());
+                array_push($tableau, $listPeople[$i]->getDisplayGn());
+                array_push($personnes, $tableau);
+            }
+        }
+
+        return $personnes;
+    }
+
+    /**
      * Enregistrer toutes les personnes
      */
     public function enregistrerPersonnes() {
