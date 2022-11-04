@@ -45,6 +45,9 @@ class PeopleRecord
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $attr7 = null;
 
+    #[ORM\Column(length: 255)]
+    private ?string $cleUid = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -166,6 +169,18 @@ class PeopleRecord
     public function setAttr7(?string $attr7): self
     {
         $this->attr7 = $attr7;
+
+        return $this;
+    }
+
+    public function getCleUid(): ?string
+    {
+        return $this->cleUid;
+    }
+
+    public function setCleUid(string $cleUid): self
+    {
+        $this->cleUid = $cleUid;
 
         return $this;
     }

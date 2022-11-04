@@ -59,118 +59,77 @@ class PersonneManager
     }
 
     /**
-     * Lister toutes les personnes : 
-     * Retourne array array string
-     * 
-     */
-    public function listPersonnes() {
-        // Connexion au Ldap
-        $ldap = $this->connectLdapService->connexionLdap();
-        // Création d'un filtre de requête
-        $filter = '(&(objectClass=peopleRecord)(sn=*))';
-        // Tableau des attributs demandés
-        $justThese = array('hierarchySV', 'sn', 'displayGn', 'mainLineNumber', 'didNumbers', 'mail', 'attr1', 'attr5', 'attr6', 'attr7');
-        // Envoi de la requête
-        $query = ldap_search($ldap, $this->connectLdapService->getBasePeople(), $filter, $justThese);
-        // Récupération des réponses de la requête
-        $personnesTotal = ldap_get_entries($ldap, $query);
-
-        // Retirer les chambres
-        $personnesWithoutChambers = $this->removeChambers($personnesTotal);
-
-        // retirer les listes rouges
-        $personnesInGreenList = array();
-        foreach ($personnesWithoutChambers as $personne) {
-            if(array_key_exists('mainlinenumber', $personne)) {
-                if(!$this->isRedList($personne['mainlinenumber'][0])) {
-                    array_push($personnesInGreenList, $personne);
-                } 
-            }
-        }
-
-        // Séparer les personnes et les services
-        $personnes = array();
-        foreach ($personnesInGreenList as $personne) {
-            if ($personne['displayGn'][0] != " " || $personne['displayGn'][0] == null) {
-                array_push($personnes, $personne);
-            }
-        }
-
-        return $personnes;
-    }
-
-    /**
      * Persister toutes les personnes
      */
-    public function savePersonnes()
-    {
-        $entityManager = $this->doctrine->getManager();
-        $listePersonnes = $this->listPersonnes();
+    // public function enregistrerPersonnes()
+    // {
+    //     $entityManager = $this->doctrine->getManager();
+    //     $listePersonnes = $this->peopleRecordRepo->findAll();
 
-        foreach($listePersonnes as $key => $value) {
-            // Créer un objet
-            $personne = new Personne();
+    //     foreach($listePersonnes as $key => $value) {
+    //         // Créer un objet
+    //         $personne = new Personne();
 
-            // Hydrater l'objet
-            $personne->setNom($value['sn'][0]);
-            $personne->setPrenom($value['displaygn'][0]);
-            if (in_array('mail', $value)) {
-                $personne->setMail($value['mail'][0]);
-            } else {
-                $personne->setMail(null);
-            }
-            $personne->setTelephoneCourt($value['mainlinenumber'][0]);
-            if (in_array('didnumbers', $value)) {
-                $personne->setTelephoneLong($value['didnumbers'][0]);
-            } else {
-                $personne->setTelephoneLong(null);
-            }
+    //         // Hydrater l'objet
+    //         $personne->setNom($value['sn'][0]);
+    //         $personne->setPrenom($value['displaygn'][0]);
+    //         if (in_array('mail', $value)) {
+    //             $personne->setMail($value['mail'][0]);
+    //         } else {
+    //             $personne->setMail(null);
+    //         }
+    //         $personne->setTelephoneCourt($value['mainlinenumber'][0]);
+    //         if (in_array('didnumbers', $value)) {
+    //             $personne->setTelephoneLong($value['didnumbers'][0]);
+    //         } else {
+    //             $personne->setTelephoneLong(null);
+    //         }
             
-            // Configurer son métier
-            if ($this->findMetier($personne->getNom(), $personne->getPrenom()) != null) {
-                $metier = $this->findMetier($personne->getNom(), $personne->getPrenom());
-                $personne->setMetier($metier);
-            } else {
-                $personne->setMetier(null);
-            }
+    //         // Configurer son métier
+    //         if ($this->findMetier($personne->getNom(), $personne->getPrenom()) != null) {
+    //             $metier = $this->findMetier($personne->getNom(), $personne->getPrenom());
+    //             $personne->setMetier($metier);
+    //         } else {
+    //             $personne->setMetier(null);
+    //         }
 
-            // Configurer son hôpital
-            if ($this->findHopital($personne->getNom(), $personne->getPrenom()) != null) {
-                $hopital = $this->findHopital($personne->getNom(), $personne->getPrenom());
-                $personne->setHopital($hopital);
-            } else {
-                $personne->setHopital(null);
-            }
+    //         // Configurer son hôpital
+    //         if ($this->findHopital($personne->getNom(), $personne->getPrenom()) != null) {
+    //             $hopital = $this->findHopital($personne->getNom(), $personne->getPrenom());
+    //             $personne->setHopital($hopital);
+    //         } else {
+    //             $personne->setHopital(null);
+    //         }
 
-            // Configurer son bâtiment
-            if ($this->findBatiment($personne->getNom(), $personne->getPrenom()) != null) {
-                $batiment = $this->findBatiment($personne->getNom(), $personne->getPrenom());
-                $personne->setBatiment($batiment);
-            } else {
-                $personne->setBatiment(null);
-            }
+    //         // Configurer son bâtiment
+    //         if ($this->findBatiment($personne->getNom(), $personne->getPrenom()) != null) {
+    //             $batiment = $this->findBatiment($personne->getNom(), $personne->getPrenom());
+    //             $personne->setBatiment($batiment);
+    //         } else {
+    //             $personne->setBatiment(null);
+    //         }
 
-            // Configurer son pôle
-            if ($this->findPole($personne->getNom(), $personne->getPrenom()) != null) {
-                $pole = $this->findPole($personne->getNom(), $personne->getPrenom());
-                $personne->setPole($pole);
-            } else {
-                $personne->setPole(null);
-            }
+    //         // Configurer son pôle
+    //         if ($this->findPole($personne->getNom(), $personne->getPrenom()) != null) {
+    //             $pole = $this->findPole($personne->getNom(), $personne->getPrenom());
+    //             $personne->setPole($pole);
+    //         } else {
+    //             $personne->setPole(null);
+    //         }
 
-            // Vérifier qu'il n'existe pas dans la base de données
-            $existeNom = $this->personneRepo->findBy(["nom" => $personne->getNom()]);
-            if (count($existeNom) == 0) {
-                $existePrenom = $this->personneRepo->findBy(["prenom" => $personne->getPrenom()]);
-                if (count($existePrenom) == 0) {
-                    // Persister l'objet
-                    $entityManager->persist($personne);
-                } 
-            }
-        }
+    //         // Vérifier qu'il n'existe pas dans la base de données
+    //         $existeNom = $this->personneRepo->findBy(["nom" => $personne->getNom()]);
+    //         if (count($existeNom) == 0) {
+    //             $existePrenom = $this->personneRepo->findBy(["prenom" => $personne->getPrenom()]);
+    //             if (count($existePrenom) == 0) {
+    //                 // Persister l'objet
+    //                 $entityManager->persist($personne);
+    //             } 
+    //         }
+    //     }
         
-        $entityManager->flush();
-    }
+    //     $entityManager->flush();
+    // }
 
     /**
      * Trouver le métier de la personne : 
