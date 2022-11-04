@@ -4,33 +4,31 @@ namespace App\Service;
 
 use App\Entity\Hopital;
 use App\Repository\HopitalRepository;
-use App\Repository\PeopleRecordRepository;
-use App\Service\ConnectLdapService;
 use Doctrine\Persistence\ManagerRegistry;
+use App\Repository\PeopleRecordRepository;
 
 class HopitalManager
 {
-    private $ldap;
-    private $connectLdapService;
     private $doctrine;
-    private $hopitalRepo;
-    private $recordManager;
     private $peopleRecordRepository;
+    private $hopitalRepo;
 
     /**
      * Constructeur
      * Injection de ConnectLdapService
      */
-    public function __construct(ConnectLdapService $connectLdapService, 
-                                ManagerRegistry $doctrine, 
-                                HopitalRepository $hopitalRepo,
-                                PeopleRecordRepository $peopleRecordRepository) {
-        $this->connectLdapService = $connectLdapService;
+    public function __construct(ManagerRegistry $doctrine,
+                                PeopleRecordRepository $peopleRecordRepository,
+                                HopitalRepository $hopitalRepo) {
         $this->doctrine = $doctrine;
-        $this->hopitalRepo = $hopitalRepo;
         $this->peopleRecordRepository = $peopleRecordRepository;
+        $this->hopitalRepo = $hopitalRepo;
     }
 
+    /**
+     * Récupérer la liste des hopitaux 
+     * Retourne tableau de string
+     */
     public function getHopitaux() {
         $hopitaux = array();
         $listPeople = $this->peopleRecordRepository->findAll();
@@ -45,24 +43,17 @@ class HopitalManager
     }
 
     /**
-     * Persister tous les hôpitaux
+     * Enregistre les hopitaux dans la bdd
      * 
      */
-    public function saveHopitaux()
-    {
+    public function enregistrerHopitaux() {
         $entityManager = $this->doctrine->getManager();
-        $listeHopitaux = $this->getHopitaux();
+        $listHopitaux = $this->getHopitaux();
 
-        foreach ($listeHopitaux as $key => $value) {
-            // Créer un objet
+        foreach ($listHopitaux as $key => $value) {
             $hopital = new Hopital();
-            // Configurer son nom
             $hopital->setNom($value);
-            
-            // Vérifier qu'il n'existe pas dans la base de données
-            $existe = $this->hopitalRepo->findBy(["nom" => $hopital->getNom()]);
-            if (count($existe) == 0) {
-                // Persister l'objet
+            if ($this->hopitalRepo->findOneBy(['nom' => $hopital->getNom()]) == null) {
                 $entityManager->persist($hopital);
             }
         }

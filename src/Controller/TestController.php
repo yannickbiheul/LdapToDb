@@ -50,8 +50,8 @@ class TestController extends AbstractController
     #[Route('/test', name: 'app_test')]
     public function index(): Response
     {
-        
-        $this->recordManager->enregistrerTout();
+        // enregistrement des bâtiments
+        $this->batimentManager->enregistrerBatiments();
 
         return $this->json([
             'resultat' => "TOUT VA BIEN !!!",
@@ -64,17 +64,9 @@ class TestController extends AbstractController
      */
     public function testTest() {
 
-        // Sauvegarder les hôpitaux
-        $this->hopitalManager->saveHopitaux();
-        // Sauvegarder les bâtiments
-        $this->batimentManager->saveBatiments();
-        // Sauvegarder les pôles
-        $this->poleManager->savePoles();
-        // Sauvegarder les métiers
-        $this->metierManager->saveMetiers();
-        // Sauvegarder les services
-        $this->serviceManager->saveServices();
-        // Sauvegarder les personnes
-        $this->personneManager->savePersonnes();
+        // Enregistrement de toutes les donénes "peopleRecord"
+        $this->recordManager->enregistrerTout();
+        // Enregistrement des h$opitaux
+        $this->hopitalManager->enregistrerHopitaux();
     }
 }

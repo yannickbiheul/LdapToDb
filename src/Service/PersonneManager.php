@@ -13,6 +13,7 @@ use App\Repository\MetierRepository;
 use App\Repository\HopitalRepository;
 use App\Repository\ServiceRepository;
 use App\Repository\BatimentRepository;
+use App\Repository\NumberRecordRepository;
 use App\Repository\PersonneRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use App\Repository\PeopleRecordRepository;
@@ -33,6 +34,7 @@ class PersonneManager
     private $batimentRepo;
     private $serviceRepo;
     private $peopleRecordRepo;
+    private $numberRecordRepo;
 
     /**
      * Constructeur
@@ -46,7 +48,8 @@ class PersonneManager
                                 PoleRepository $poleRepo,
                                 BatimentRepository $batimentRepo,
                                 ServiceRepository $serviceRepo,
-                                PeopleRecordRepository $peopleRecordRepo) {
+                                PeopleRecordRepository $peopleRecordRepo,
+                                NumberRecordRepository $numberRecordRepo) {
         $this->connectLdapService = $connectLdapService;
         $this->metierRepo = $metierRepo;
         $this->doctrine = $doctrine;
@@ -56,80 +59,36 @@ class PersonneManager
         $this->batimentRepo = $batimentRepo;
         $this->serviceRepo = $serviceRepo;
         $this->peopleRecordRepo = $peopleRecordRepo;
+        $this->numberRecordRepo = $numberRecordRepo;
     }
 
     /**
-     * Persister toutes les personnes
+     * Enregistrer toutes les personnes
      */
-    // public function enregistrerPersonnes()
-    // {
-    //     $entityManager = $this->doctrine->getManager();
-    //     $listePersonnes = $this->peopleRecordRepo->findAll();
+    public function enregistrerPersonnes() {
+        $entityManager = $this->doctrine->getManager();
+        $listPeopleRecord = $this->peopleRecordRepo->findAll();
+        $listNumberRecord = $this->numberRecordRepo->findAll();
 
-    //     foreach($listePersonnes as $key => $value) {
-    //         // Créer un objet
-    //         $personne = new Personne();
+        for ($i=0; $i < count($listPeopleRecord); $i++) { 
 
-    //         // Hydrater l'objet
-    //         $personne->setNom($value['sn'][0]);
-    //         $personne->setPrenom($value['displaygn'][0]);
-    //         if (in_array('mail', $value)) {
-    //             $personne->setMail($value['mail'][0]);
-    //         } else {
-    //             $personne->setMail(null);
-    //         }
-    //         $personne->setTelephoneCourt($value['mainlinenumber'][0]);
-    //         if (in_array('didnumbers', $value)) {
-    //             $personne->setTelephoneLong($value['didnumbers'][0]);
-    //         } else {
-    //             $personne->setTelephoneLong(null);
-    //         }
-            
-    //         // Configurer son métier
-    //         if ($this->findMetier($personne->getNom(), $personne->getPrenom()) != null) {
-    //             $metier = $this->findMetier($personne->getNom(), $personne->getPrenom());
-    //             $personne->setMetier($metier);
-    //         } else {
-    //             $personne->setMetier(null);
-    //         }
+            // CONTRAINTES: numéros de chambres et liste rouge
+            $private = $this->numberRecordRepo->findOneBy(['phoneNumber' => $listPeopleRecord[$i]->getMainLineNumber()]);
+            if ($listPeopleRecord[$i]->getHierarchySV() != "PATIENTS/CHIC" && $private->getPrivate() != "LR") {
 
-    //         // Configurer son hôpital
-    //         if ($this->findHopital($personne->getNom(), $personne->getPrenom()) != null) {
-    //             $hopital = $this->findHopital($personne->getNom(), $personne->getPrenom());
-    //             $personne->setHopital($hopital);
-    //         } else {
-    //             $personne->setHopital(null);
-    //         }
+                // CREATION DE L'OBJET
+                $personne = new Personne();
+                // PRENOM
+                $personne->setPrenom($listPeopleRecord[$i]->getDisplayGn());
+                // NOM
+                $personne->setNom($listPeopleRecord[$i]->getSn());
+                // TELEPHONE COURT
+                $personne->setTelephoneCourt($listPeopleRecord[$i]->getMainLineNumber());
 
-    //         // Configurer son bâtiment
-    //         if ($this->findBatiment($personne->getNom(), $personne->getPrenom()) != null) {
-    //             $batiment = $this->findBatiment($personne->getNom(), $personne->getPrenom());
-    //             $personne->setBatiment($batiment);
-    //         } else {
-    //             $personne->setBatiment(null);
-    //         }
 
-    //         // Configurer son pôle
-    //         if ($this->findPole($personne->getNom(), $personne->getPrenom()) != null) {
-    //             $pole = $this->findPole($personne->getNom(), $personne->getPrenom());
-    //             $personne->setPole($pole);
-    //         } else {
-    //             $personne->setPole(null);
-    //         }
-
-    //         // Vérifier qu'il n'existe pas dans la base de données
-    //         $existeNom = $this->personneRepo->findBy(["nom" => $personne->getNom()]);
-    //         if (count($existeNom) == 0) {
-    //             $existePrenom = $this->personneRepo->findBy(["prenom" => $personne->getPrenom()]);
-    //             if (count($existePrenom) == 0) {
-    //                 // Persister l'objet
-    //                 $entityManager->persist($personne);
-    //             } 
-    //         }
-    //     }
-        
-    //     $entityManager->flush();
-    // }
+            }
+        }
+    }
 
     /**
      * Trouver le métier de la personne : 
