@@ -10,7 +10,7 @@ use App\Repository\PeopleRecordRepository;
 class HopitalManager
 {
     private $doctrine;
-    private $peopleRecordRepository;
+    private $peopleRecordRepo;
     private $hopitalRepo;
 
     /**
@@ -18,10 +18,10 @@ class HopitalManager
      * Injection de ConnectLdapService
      */
     public function __construct(ManagerRegistry $doctrine,
-                                PeopleRecordRepository $peopleRecordRepository,
+                                PeopleRecordRepository $peopleRecordRepo,
                                 HopitalRepository $hopitalRepo) {
         $this->doctrine = $doctrine;
-        $this->peopleRecordRepository = $peopleRecordRepository;
+        $this->peopleRecordRepo = $peopleRecordRepo;
         $this->hopitalRepo = $hopitalRepo;
     }
 
@@ -31,7 +31,7 @@ class HopitalManager
      */
     public function getHopitaux() {
         $hopitaux = array();
-        $listPeople = $this->peopleRecordRepository->findAll();
+        $listPeople = $this->peopleRecordRepo->findAll();
 
         for ($i=0; $i < count($listPeople); $i++) { 
             if (property_exists($listPeople[$i], 'attr5') && $listPeople[$i]->getAttr5() != null) {

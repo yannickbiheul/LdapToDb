@@ -50,12 +50,7 @@ class TestController extends AbstractController
     #[Route('/test', name: 'app_test')]
     public function index(): Response
     {
-        // Enregistrement des hôpitaux
-        $this->hopitalManager->enregistrerHopitaux();
-        // Enregistrement des bâtiments
-        $this->batimentManager->enregistrerBatiments();
-        // Enregistrer les pôles
-        $this->poleManager->enregistrerPoles();
+        $this->metierManager->enregistrerMetiers();
         
         return $this->json([
             'resultat' => "TOUT VA BIEN !!!",

@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Entity\Metier;
 use App\Repository\MetierRepository;
+use App\Repository\PeopleRecordRepository;
 use App\Service\ConnectLdapService;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -13,6 +14,7 @@ class MetierManager
     private $connectLdapService;
     private $doctrine;
     private $metierRepo;
+    private $peopleRecordRepo;
 
     /**
      * Constructeur
@@ -20,58 +22,43 @@ class MetierManager
      */
     public function __construct(ConnectLdapService $connectLdapService, 
                                 ManagerRegistry $doctrine,
-                                MetierRepository $metierRepo) {
+                                MetierRepository $metierRepo,
+                                PeopleRecordRepository $peopleRecordRepo) {
         $this->connectLdapService = $connectLdapService;
         $this->doctrine = $doctrine;
         $this->metierRepo = $metierRepo;
+        $this->peopleRecordRepo = $peopleRecordRepo;
     }
 
     /**
-     * Lister tous les métiers : 
-     * Retourne array String
+     * Récupérer la liste des métiers 
+     * Retourne tableau de string
      */
-    public function listMetiers()
-    {
-        // Connexion au Ldap
-        $ldap = $this->connectLdapService->connexionLdap();
-        // Création d'un filtre de requête
-        $filter = 'objectClass=peopleRecord';
-        // Tableau des attributs demandés
-        $justThese = array('attr7');
-        // Envoi de la requête
-        $query = ldap_search($ldap, $this->connectLdapService->getBasePeople(), $filter, $justThese);
-        // Récupération des réponses de la requête
-        $infos = ldap_get_entries($ldap, $query);
-        // Remplissage du tableau de métiers
-        $tableau = array();
-        for ($i=0; $i < count($infos); $i++) { 
-            if (isset($infos[$i]['attr7'])) {
-                $tableau[$i] = $infos[$i]['attr7'][0];
-            } 
+    public function getMetiers() {
+        $metiers = array();
+        $listPeople = $this->peopleRecordRepo->findAll();
+
+        for ($i=0; $i < count($listPeople); $i++) { 
+            if (property_exists($listPeople[$i], 'attr7') && $listPeople[$i]->getAttr7() != null) {
+                array_push($metiers, $listPeople[$i]->getAttr7());
+            }
         }
 
-        return array_unique($tableau);
+        return array_unique($metiers);
     }
 
     /**
-     * Persister tous les métiers
+     * Enregistrer les métiers dans la bdd
      * 
      */
-    public function saveMetiers()
-    {
+    public function enregistrerMetiers() {
         $entityManager = $this->doctrine->getManager();
-        $listeMetiers = $this->listMetiers();
+        $listMetiers = $this->getMetiers();
 
-        foreach ($listeMetiers as $key => $value) {
-            // Créer un objet
+        foreach ($listMetiers as $key => $value) {
             $metier = new Metier();
-            // Configurer son nom
             $metier->setNom($value);
-            
-            // Vérifier qu'il n'existe pas dans la base de données
-            $existe = $this->metierRepo->findBy(["nom" => $metier->getNom()]);
-            if (count($existe) == 0) {
-                // Persister l'objet
+            if ($this->metierRepo->findOneBy(['nom' => $metier->getNom()]) == null) {
                 $entityManager->persist($metier);
             }
         }
