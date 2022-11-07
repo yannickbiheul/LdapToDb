@@ -2,10 +2,11 @@
 
 namespace App\Entity;
 
-use App\Repository\PoleRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\PoleRepository;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: PoleRepository::class)]
 class Pole
@@ -13,12 +14,15 @@ class Pole
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["getPoles", "getBatiments"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255, unique: true)]
+    #[Groups(["getPoles", "getBatiments"])]
     private ?string $nom = null;
 
     #[ORM\ManyToOne(inversedBy: 'poles')]
+    #[Groups(["getPoles"])]
     private ?Batiment $batiment = null;
 
     #[ORM\OneToMany(mappedBy: 'pole', targetEntity: Personne::class)]

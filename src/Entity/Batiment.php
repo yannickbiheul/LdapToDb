@@ -2,10 +2,11 @@
 
 namespace App\Entity;
 
-use App\Repository\BatimentRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\BatimentRepository;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: BatimentRepository::class)]
 class Batiment
@@ -13,15 +14,18 @@ class Batiment
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["getHopitaux", "getBatiments", "getPoles"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255, unique: true)]
+    #[Groups(["getHopitaux", "getBatiments", "getPoles"])]
     private ?string $nom = null;
 
     #[ORM\OneToMany(mappedBy: 'batiment', targetEntity: Pole::class)]
     private Collection $poles;
 
     #[ORM\ManyToOne(inversedBy: 'batiments')]
+    #[Groups(["getBatiments", "getPoles"])]
     private ?Hopital $hopital = null;
 
     #[ORM\OneToMany(mappedBy: 'batiment', targetEntity: Personne::class)]
