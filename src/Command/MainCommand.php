@@ -2,11 +2,7 @@
 
 namespace App\Command;
 
-use App\Service\PoleManager;
-use App\Service\MetierManager;
-use App\Service\HopitalManager;
-use App\Service\BatimentManager;
-use App\Service\PersonneManager;
+use App\Service\RecordManager;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
@@ -15,43 +11,32 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
     name: 'app:main',
-    description: 'lancer une commande',
+    description: 'Enregistrer toutes les données Ldap dans la base de données',
     hidden: false,
     aliases: ['app:command-main']
 )]
 class MainCommand extends Command
 {
-    private PersonneManager $personneManager;
-    private PoleManager $poleManager;
-    private BatimentManager $batimentManager;
-    private HopitalManager $hopitalManager;
-    private MetierManager $metierManager;
+    private RecordManager $recordManager;
 
     /**
      * Constructeur
      * Injection de PersonneManager
      */
-    public function __construct(PersonneManager $personneManager, 
-                                PoleManager $poleManager, 
-                                BatimentManager $batimentManager,
-                                HopitalManager $hopitalManager,
-                                MetierManager $metierManager)
+    public function __construct(RecordManager $recordManager)
     {
-        $this->personneManager = $personneManager;
-        $this->poleManager = $poleManager;
-        $this->batimentManager = $batimentManager;
-        $this->hopitalManager = $hopitalManager;
-        $this->metierManager = $metierManager;
+        $this->recordManager = $recordManager;
         parent::__construct();
     }
 
     /**
      * Execute : 
-     * Récupère les tables et les envoie à la base de données
+     * Récupère les données et les envoie à la base de données
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        
+        $this->recordManager->enregistrerTout();
+
         return Command::SUCCESS;
     }
 }

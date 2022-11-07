@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20221104080937 extends AbstractMigration
+final class Version20221107135426 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -35,8 +35,8 @@ final class Version20221104080937 extends AbstractMigration
         $this->addSql('CREATE UNIQUE INDEX UNIQ_8718F2C6C6E55B5 ON hopital (nom)');
         $this->addSql('CREATE TABLE metier (id INT NOT NULL, nom VARCHAR(255) NOT NULL, PRIMARY KEY(id))');
         $this->addSql('CREATE TABLE number_record (id INT NOT NULL, phone_number VARCHAR(255) NOT NULL, did_number VARCHAR(255) DEFAULT NULL, private VARCHAR(255) NOT NULL, PRIMARY KEY(id))');
-        $this->addSql('CREATE TABLE people_record (id INT NOT NULL, sn VARCHAR(255) NOT NULL, display_gn VARCHAR(255) DEFAULT NULL, main_line_number VARCHAR(255) DEFAULT NULL, did_numbers VARCHAR(255) DEFAULT NULL, mail VARCHAR(255) DEFAULT NULL, hierarchy_sv VARCHAR(255) NOT NULL, attr1 VARCHAR(255) DEFAULT NULL, attr5 VARCHAR(255) DEFAULT NULL, attr6 VARCHAR(255) DEFAULT NULL, attr7 VARCHAR(255) DEFAULT NULL, PRIMARY KEY(id))');
-        $this->addSql('CREATE TABLE personne (id INT NOT NULL, metier_id INT DEFAULT NULL, hopital_id INT DEFAULT NULL, pole_id INT DEFAULT NULL, batiment_id INT DEFAULT NULL, prenom VARCHAR(255) NOT NULL, nom VARCHAR(255) NOT NULL, telephone_court VARCHAR(255) NOT NULL, telephone_long VARCHAR(255) DEFAULT NULL, mail VARCHAR(255) DEFAULT NULL, PRIMARY KEY(id))');
+        $this->addSql('CREATE TABLE people_record (id INT NOT NULL, sn VARCHAR(255) NOT NULL, display_gn VARCHAR(255) DEFAULT NULL, main_line_number VARCHAR(255) DEFAULT NULL, did_numbers VARCHAR(255) DEFAULT NULL, mail VARCHAR(255) DEFAULT NULL, hierarchy_sv VARCHAR(255) NOT NULL, attr1 VARCHAR(255) DEFAULT NULL, attr5 VARCHAR(255) DEFAULT NULL, attr6 VARCHAR(255) DEFAULT NULL, attr7 VARCHAR(255) DEFAULT NULL, cle_uid VARCHAR(255) NOT NULL, PRIMARY KEY(id))');
+        $this->addSql('CREATE TABLE personne (id INT NOT NULL, metier_id INT DEFAULT NULL, hopital_id INT DEFAULT NULL, pole_id INT DEFAULT NULL, batiment_id INT DEFAULT NULL, prenom VARCHAR(255) NOT NULL, nom VARCHAR(255) NOT NULL, telephone_court VARCHAR(255) DEFAULT NULL, telephone_long VARCHAR(255) DEFAULT NULL, mail VARCHAR(255) DEFAULT NULL, PRIMARY KEY(id))');
         $this->addSql('CREATE INDEX IDX_FCEC9EFED16FA20 ON personne (metier_id)');
         $this->addSql('CREATE INDEX IDX_FCEC9EFCC0FBF92 ON personne (hopital_id)');
         $this->addSql('CREATE INDEX IDX_FCEC9EF419C3385 ON personne (pole_id)');

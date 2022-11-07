@@ -50,7 +50,7 @@ class TestController extends AbstractController
     #[Route('/test', name: 'app_test')]
     public function index(): Response
     {
-        $this->serviceManager->enregistrerServices();
+        $this->personneManager->enregistrerPersonnes();
         
         return $this->json([
             'resultat' => "TOUT VA BIEN !!!",
@@ -71,7 +71,9 @@ class TestController extends AbstractController
         $this->batimentManager->enregistrerBatiments();
         // Enregistrer les pôles
         $this->poleManager->enregistrerPoles();
-        // Enregistrer les métiers
-        $this->metierManager->enregistrerMetiers();
+        // Enregistrer les services
+        $this->serviceManager->enregistrerServices();
+        // Enregistrer les personnes
+        $this->personneManager->enregistrerPersonnes();
     }
 }

@@ -14,11 +14,11 @@ class Metier
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["getmetiers", "getPersonnes"])]
+    #[Groups(["getMetiers", "getPersonnes"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["getmetiers", "getPersonnes"])]
+    #[Groups(["getMetiers", "getPersonnes"])]
     private ?string $nom = null;
 
     #[ORM\OneToMany(mappedBy: 'metier', targetEntity: Personne::class)]
