@@ -22,6 +22,7 @@ class Batiment
     private ?string $nom = null;
 
     #[ORM\OneToMany(mappedBy: 'batiment', targetEntity: Pole::class)]
+    #[Groups(["getHopitaux", "getBatiments"])]
     private Collection $poles;
 
     #[ORM\ManyToOne(inversedBy: 'batiments')]

@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Personne;
 use App\Repository\PersonneRepository;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -11,6 +12,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class PersonneController extends AbstractController
 {
+    /**
+     * Afficher la liste des personnes
+     */
     #[Route('/api/personnes', name: 'personnes', methods: ['GET'])]
     public function index(PersonneRepository $personneRepository, SerializerInterface $serializer): JsonResponse
     {
@@ -18,5 +22,15 @@ class PersonneController extends AbstractController
         $jsonListPersonnes = $serializer->serialize($listPersonnes, 'json', ['groups' => 'getPersonnes']);
 
         return new JsonResponse($jsonListPersonnes, Response::HTTP_OK, [], true);
+    }
+
+    /**
+     * Afficher une personne
+     */
+    #[Route('/api/personnes/{id}', name: 'detailPersonne', methods: ['GET'])]
+    public function getDetailPersonne(Personne $personne, SerializerInterface $serializer): JsonResponse
+    {
+        $jsonPersonne = $serializer->serialize($personne, 'json', ['groups' => 'getPersonnes']);
+        return new JsonResponse($jsonPersonne, Response::HTTP_OK, [], true);
     }
 }
