@@ -14,11 +14,11 @@ class Pole
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["getPoles", "getBatiments"])]
+    #[Groups(["getPoles", "getBatiments", "getPersonnes", "getServices"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255, unique: true)]
-    #[Groups(["getPoles", "getBatiments"])]
+    #[Groups(["getPoles", "getBatiments", "getPersonnes", "getServices"])]
     private ?string $nom = null;
 
     #[ORM\ManyToOne(inversedBy: 'poles')]

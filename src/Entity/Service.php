@@ -2,8 +2,9 @@
 
 namespace App\Entity;
 
-use App\Repository\ServiceRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\ServiceRepository;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ServiceRepository::class)]
 class Service
@@ -11,24 +12,31 @@ class Service
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["getServices"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["getServices"])]
     private ?string $nom = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(["getServices"])]
     private ?string $telephone_court = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(["getServices"])]
     private ?string $telephone_long = null;
 
     #[ORM\ManyToOne(inversedBy: 'services')]
+    #[Groups(["getServices"])]
     private ?Pole $pole = null;
 
     #[ORM\ManyToOne(inversedBy: 'services')]
+    #[Groups(["getServices"])]
     private ?Batiment $batiment = null;
 
     #[ORM\ManyToOne(inversedBy: 'services')]
+    #[Groups(["getServices"])]
     private ?Hopital $hopital = null;
 
     public function getId(): ?int

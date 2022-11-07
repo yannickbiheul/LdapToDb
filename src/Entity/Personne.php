@@ -2,8 +2,9 @@
 
 namespace App\Entity;
 
-use App\Repository\PersonneRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\PersonneRepository;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: PersonneRepository::class)]
 class Personne
@@ -11,33 +12,43 @@ class Personne
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["getPersonnes"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["getPersonnes"])]
     private ?string $prenom = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["getPersonnes"])]
     private ?string $nom = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(["getPersonnes"])]
     private ?string $telephone_court = null;
 
     #[ORM\ManyToOne(inversedBy: 'personnes')]
+    #[Groups(["getPersonnes"])]
     private ?Metier $metier = null;
 
     #[ORM\ManyToOne(inversedBy: 'personnes')]
+    #[Groups(["getPersonnes"])]
     private ?Hopital $hopital = null;
 
     #[ORM\ManyToOne(inversedBy: 'personnes')]
+    #[Groups(["getPersonnes"])]
     private ?Pole $pole = null;
 
     #[ORM\ManyToOne(inversedBy: 'personnes')]
+    #[Groups(["getPersonnes"])]
     private ?Batiment $batiment = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(["getPersonnes"])]
     private ?string $telephone_long = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(["getPersonnes"])]
     private ?string $mail = null;
 
     public function getId(): ?int

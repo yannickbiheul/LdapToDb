@@ -2,10 +2,11 @@
 
 namespace App\Entity;
 
-use App\Repository\MetierRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\MetierRepository;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: MetierRepository::class)]
 class Metier
@@ -13,9 +14,11 @@ class Metier
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["getmetiers", "getPersonnes"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["getmetiers", "getPersonnes"])]
     private ?string $nom = null;
 
     #[ORM\OneToMany(mappedBy: 'metier', targetEntity: Personne::class)]

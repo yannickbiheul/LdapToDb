@@ -14,11 +14,11 @@ class Batiment
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["getHopitaux", "getBatiments", "getPoles"])]
+    #[Groups(["getHopitaux", "getBatiments", "getPoles", "getPersonnes", "getServices"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255, unique: true)]
-    #[Groups(["getHopitaux", "getBatiments", "getPoles"])]
+    #[Groups(["getHopitaux", "getBatiments", "getPoles", "getPersonnes", "getServices"])]
     private ?string $nom = null;
 
     #[ORM\OneToMany(mappedBy: 'batiment', targetEntity: Pole::class)]
