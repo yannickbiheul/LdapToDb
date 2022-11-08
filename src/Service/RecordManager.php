@@ -2,12 +2,14 @@
 
 namespace App\Service;
 
+use App\Entity\Contact;
 use App\Entity\NumberRecord;
 use App\Entity\PeopleRecord;
-use App\Repository\NumberRecordRepository;
-use App\Repository\PeopleRecordRepository;
+use App\Repository\ContactRepository;
 use App\Service\ConnectLdapService;
 use Doctrine\Persistence\ManagerRegistry;
+use App\Repository\NumberRecordRepository;
+use App\Repository\PeopleRecordRepository;
 
 /**
  * Récupère toutes les données de l'annuaire, 
@@ -21,6 +23,7 @@ class RecordManager
     private $doctrine;
     private $numberRecordRepository;
     private $peopleRecordRepository;
+    private $contactRepository;
 
     /**
      * Constructeur
@@ -29,11 +32,60 @@ class RecordManager
     public function __construct(ConnectLdapService $connectLdapService, 
                                 ManagerRegistry $doctrine,
                                 NumberRecordRepository $numberRecordRepository,
-                                PeopleRecordRepository $peopleRecordRepository) {
+                                PeopleRecordRepository $peopleRecordRepository,
+                                ContactRepository $contactRepository) {
         $this->connectLdapService = $connectLdapService;
         $this->doctrine = $doctrine;
         $this->numberRecordRepository = $numberRecordRepository;
         $this->peopleRecordRepository = $peopleRecordRepository;
+        $this->contactRepository = $contactRepository;
+    }
+
+    /**
+     * Liste toutes les entrées du Ldap de l'objectClass "contactRecord"
+     * Retourne tableau de tableau "listContactRecords"
+     */
+    public function listContactRecord() {
+        // Connexion au Ldap
+        $ldap = $this->connectLdapService->connexionLdap();
+        // Création d'un filtre de requête
+        $filter = '(&(objectClass=contactRecord)(sn=*))';
+        // Tableau des attributs demandés
+        $justThese = array('phonenumber', 'sn', 'private');
+        // Envoi de la requête
+        $query = ldap_search($ldap, $this->connectLdapService->getBaseContact(), $filter, $justThese);
+        // Récupération des réponses de la requête
+        $listContactRecords = ldap_get_entries($ldap, $query);
+
+        return $listContactRecords;
+    }
+
+    /**
+     * Enregistre toutes les entrées du Ldap de l'objectClass "contactRecord" 
+     * 
+     */
+    public function enregistrerContact() {
+        $listContactRecord = $this->listContactRecord();
+        $entityManager = $this->doctrine->getManager();
+
+        // Contact RECORD
+        for ($i=0; $i < count($listContactRecord)-1; $i++) { 
+            if ($listContactRecord[$i]['private'][0] != 'LR') {
+                // création d'un objet
+                $contact = new Contact();
+                // NOM
+                $contact->setNom($listContactRecord[$i]['sn'][0]);
+                // TELEPHONE
+                $contact->setTelephone($listContactRecord[$i]['phonenumber'][0]);
+                // Vérifier qu'il n'existe pas dans la base de données
+                $exist = $this->contactRepository->findOneBy(['nom' => $contact->getNom()]);
+                if ($exist == null) {
+                    $entityManager->persist($contact);
+                }
+            }
+        }
+
+        $entityManager->flush();
     }
 
     /**
