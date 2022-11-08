@@ -111,7 +111,7 @@ class PersonneManager
         for ($i=0; $i < count($listPersonnes); $i++) { 
             
             // CONTRAINTES: numéros de chambres et liste rouge et personne non présente dans la base
-            $personnePresente = $this->personneRepo->findOneBy(['nom' => $listPersonnes[$i]["Nom"], 'prenom' => $listPersonnes[$i]["Prenom"]]);
+            $personnePresente = $this->personneRepo->findOneBy(['nom' => strtoupper($listPersonnes[$i]["Nom"]), 'prenom' => $listPersonnes[$i]["Prenom"]]);
             if ($listPersonnes[$i]["Hierarchie"] != "PATIENTS/CHIC" && $listPersonnes[$i]["Private"] != "LR" && $personnePresente == null) {
                 $personne = new Personne();
                 // BATIMENT
@@ -126,7 +126,7 @@ class PersonneManager
                 $metier = $this->metierRepo->findOneBy(['nom' => $listPersonnes[$i]["Metier"]]);
                 $personne->setMetier($metier);
                 // NOM
-                $personne->setNom($listPersonnes[$i]["Nom"]);
+                $personne->setNom(strtoupper($listPersonnes[$i]["Nom"]));
                 // POLE
                 $pole = $this->poleRepo->findOneBy(['nom' => $listPersonnes[$i]["Pole"]]);
                 $personne->setPole($pole);
