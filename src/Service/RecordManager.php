@@ -246,6 +246,7 @@ class RecordManager
     public function enregistrerTout() {
         $this->enregistrerNumber();
         $this->enregistrerPeople();
+        $this->enregistrerContact();
     }
 
     public function getNumbersGreenList() {

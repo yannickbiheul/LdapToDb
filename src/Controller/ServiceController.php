@@ -15,7 +15,7 @@ class ServiceController extends AbstractController
     /**
      * Afficher la liste des services
      */
-    #[Route('/api/services', name: 'services')]
+    #[Route('/api/services', name: 'services', methods: ['GET'])]
     public function index(ServiceRepository $serviceRepository, SerializerInterface $serializer): JsonResponse
     {
         $listServices = $serviceRepository->findAll();

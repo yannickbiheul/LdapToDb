@@ -15,7 +15,7 @@ class BatimentController extends AbstractController
     /**
      * Afficher la liste des bâtiments
      */
-    #[Route('/api/batiments', name: 'batiments')]
+    #[Route('/api/batiments', name: 'batiments', methods: ['GET'])]
     public function index(BatimentRepository $batimentRepository, SerializerInterface $serializer): JsonResponse
     {
         $listBatiments = $batimentRepository->findAll();

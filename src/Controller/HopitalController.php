@@ -15,7 +15,7 @@ class HopitalController extends AbstractController
     /**
      * Afficher la liste des hôpitaux
      */
-    #[Route('/api/hopitaux', name: 'hopitaux')]
+    #[Route('/api/hopitaux', name: 'hopitaux', methods: ['GET'])]
     public function index(HopitalRepository $hopitalRepository, SerializerInterface $serializer): JsonResponse
     {
         $listHopitaux = $hopitalRepository->findAll();

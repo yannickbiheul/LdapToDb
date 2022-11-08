@@ -15,7 +15,7 @@ class MetierController extends AbstractController
     /**
      * Afficher la liste des métiers
      */
-    #[Route('/api/metiers', name: 'metiers')]
+    #[Route('/api/metiers', name: 'metiers', methods: ['GET'])]
     public function index(MetierRepository $metierRepository, SerializerInterface $serializer): JsonResponse
     {
         $listMetiers = $metierRepository->findAll();

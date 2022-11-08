@@ -50,7 +50,7 @@ class TestController extends AbstractController
     #[Route('/test', name: 'app_test')]
     public function index(): Response
     {
-        $this->recordManager->enregistrerContact();
+        $this->recordManager->enregistrerTout();
         
         return $this->json([
             'resultat' => "TOUT VA BIEN !!!",

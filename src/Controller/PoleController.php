@@ -15,7 +15,7 @@ class PoleController extends AbstractController
     /**
      * Afficher la liste des pôles
      */
-    #[Route('/api/poles', name: 'poles')]
+    #[Route('/api/poles', name: 'poles', methods: ['GET'])]
     public function index(PoleRepository $poleRepository, SerializerInterface $serializer): JsonResponse
     {
         $listPoles = $poleRepository->findAll();

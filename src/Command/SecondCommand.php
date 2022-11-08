@@ -7,7 +7,6 @@ use App\Service\HopitalManager;
 use App\Service\MetierManager;
 use App\Service\PersonneManager;
 use App\Service\PoleManager;
-use App\Service\RecordManager;
 use App\Service\ServiceManager;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Attribute\AsCommand;
