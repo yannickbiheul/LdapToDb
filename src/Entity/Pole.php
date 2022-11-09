@@ -22,7 +22,7 @@ class Pole
     private ?string $nom = null;
 
     #[ORM\ManyToOne(inversedBy: 'poles')]
-    #[Groups(["getPoles"])]
+    #[Groups(["getPoles", "getPersonnes"])]
     private ?Batiment $batiment = null;
 
     #[ORM\OneToMany(mappedBy: 'pole', targetEntity: Personne::class)]
