@@ -1,12 +1,25 @@
+# Nom de l'action
 name: learn-github-actions
+# "Sous-nom" de l'action
 run-name: ${{ github.actor }} is learning GitHub Actions
+# A chaque "push" sur le repository
 on: [push]
+# Les jobs à faire : 
 jobs:
+  # 1er job: le build
   build:
+    # Version ubuntu pour github ?
     runs-on: ubuntu-latest
+    # Les étapes
     steps:
+      # Utiliser le checkout@v3 ?
       - uses: actions/checkout@v3
+      # Nom du test
       - name: Validation Composer
+        # Commande utilisée
         run: composer update
+      # Nom du test
       - name: Tests unitaires
+        # Commande utilisée
         run: php bin/phpunit --testdox
+        
