@@ -7,6 +7,9 @@ use PHPUnit\Framework\TestCase;
 
 class BatimentManagerTest extends TestCase
 {
+    /**
+     * Test liste de bâtiments
+     */
     public function testGetBatiments(): void
     {
         $batiments = array();
