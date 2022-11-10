@@ -9,4 +9,4 @@ jobs:
       - name: Validation Composer
         run: composer update
       - name: Tests unitaires
-        run: php bin/phpunit --tesdox
+        run: php bin/phpunit --testdox
