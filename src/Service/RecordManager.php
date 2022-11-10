@@ -18,7 +18,6 @@ use App\Repository\PeopleRecordRepository;
  */
 class RecordManager
 {
-    private $ldap;
     private $connectLdapService;
     private $doctrine;
     private $numberRecordRepository;
