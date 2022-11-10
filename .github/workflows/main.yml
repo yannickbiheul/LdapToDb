@@ -2,7 +2,7 @@ name: learn-github-actions
 run-name: ${{ github.actor }} is learning GitHub Actions
 on: [push]
 jobs:
-  Test Unitaires:
+  tests unitaires:
     runs-on: ubuntu-latest
     steps:
       - run: php bin/phpunit --testdox
