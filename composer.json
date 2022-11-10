@@ -1,4 +1,6 @@
 {
+    "name": "composer/json",
+    "description": "une description",
     "type": "project",
     "license": "proprietary",
     "minimum-stability": "stable",
