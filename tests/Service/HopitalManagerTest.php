@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
 
 class HopitalManagerTest extends TestCase
 {
-    public function testList(): void
+    public function testGetHopitaux(): void
     {
         $hopitaux = array();
 
