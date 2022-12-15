@@ -7,7 +7,7 @@
     
 </style>
 
-<div class="container d-flex flex-column justify-content-center align-items-center" style="height: 100vh;">
+<div class="container d-flex flex-column justify-content-center align-items-center" style="min-height: 100%;">
     <div class="row">
         <div class="col titre">
             <h1>L'annuaire du CHIC</h1>
@@ -19,7 +19,7 @@
             <div class="mb-3 d-flex align-items-center formulaire">
                 {{ form_widget(search_form.name) }}
                 {# <input type="text" name="request" class="recherche" style="width: 400px; height: 38px; margin-right: 4px;"> #}
-                <button type="submit" class="btn btn-primary" style="margin-left: 4px;">🔎</button>
+                <button type="submit" class="btn btn-primary" style="margin-left: 4px;"><i class="fa-solid fa-magnifying-glass"></i></button>
             </div>
         </div>
         {{ form_end(search_form) }}
