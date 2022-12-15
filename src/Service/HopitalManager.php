@@ -42,17 +42,45 @@ class HopitalManager
         return array_unique($hopitaux);
     }
 
+    public function corrigerHopitaux() {
+        $listHopitaux = $this->getHopitaux();
+        $listeCorrect = array();
+
+        foreach ($listHopitaux as $key => $value) {
+            if ($value == "CHIC QUIMPER" || $value == "LAENNEC" || $value == "Laennec" || $value == "Lennec" || $value == "Laenec" || $value == "Fontenoy" || $value == "Quimper") {
+                array_push($listeCorrect, "CHIC QUIMPER");
+            } elseif ($value == "Concarneau" || $value == "CHIC SITE DE CONCARNEAU" || $value == "CC") {
+                array_push($listeCorrect, "CHIC CONCARNEAU");
+            } elseif ($value == "RESIDENCE KER RADENEG" || $value == "Keradennec") {
+                array_push($listeCorrect, "RESIDENCE KER RADENEG");
+            } elseif ($value == "Ty Glazic" || $value == "RESIDENCE TY GLAZK") {
+                array_push($listeCorrect, "RESIDENCE TY GLAZIG");
+            } elseif ($value == "Ty Creach" || $value == "RESIDENCE TY CREACH") {
+                array_push($listeCorrect, "RESIDENCE TY CREACH");
+            } else {
+                array_push($listeCorrect, $value);
+            }
+        }
+
+        return array_unique($listeCorrect);
+    }
+
     /**
      * Enregistrer les hopitaux dans la bdd
      * 
      */
     public function enregistrerHopitaux() {
+        // Récupérer liste hopitaux et manager
         $entityManager = $this->doctrine->getManager();
-        $listHopitaux = $this->getHopitaux();
+        $listHopitaux = $this->corrigerHopitaux();
 
+        // parcourir la liste des hôpitaux
         foreach ($listHopitaux as $key => $value) {
+            // Créer un objet Hopital
             $hopital = new Hopital();
+            // Attribuer le nom
             $hopital->setNom($value);
+            
             if ($this->hopitalRepo->findOneBy(['nom' => $hopital->getNom()]) == null) {
                 $entityManager->persist($hopital);
             }

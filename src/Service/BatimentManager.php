@@ -63,10 +63,24 @@ class BatimentManager
             if ($this->batimentRepo->findOneBy(['nom' => $listBatiments[$key]]) == null) {
                 // Création de l'objet
                 $batiment = new Batiment();
+                // Attribution du nom
                 $batiment->setNom($listBatiments[$key]);
 
                 // Voir s'il existe un hopital pour ce batiment
                 $nomHopital = $this->peopleRecordRepo->findOneBy(['attr6' => $listBatiments[$key]])->getAttr5();
+                if ($nomHopital == "CHIC QUIMPER" || $nomHopital == "LAENNEC" || $nomHopital == "Laennec" || $nomHopital == "Lennec" || $nomHopital == "Laenec" || $nomHopital == "Fontenoy" || $nomHopital == "Quimper") {
+                    $nomHopital = "CHIC QUIMPER";
+                } elseif ($nomHopital == "Concarneau" || $nomHopital == "CHIC SITE DE CONCARNEAU" || $nomHopital == "CC") {
+                    $nomHopital = "CHIC CONCARNEAU";
+                } elseif ($nomHopital == "RESIDENCE KER RADENEG" || $nomHopital == "Keradennec") {
+                    $nomHopital = "RESIDENCE KER RADENEG";
+                } elseif ($nomHopital == "Ty Glazic" || $nomHopital == "RESIDENCE TY GLAZK") {
+                    $nomHopital = "RESIDENCE TY GLAZIG";
+                } elseif ($nomHopital == "Ty Creach" || $nomHopital == "RESIDENCE TY CREACH") {
+                    $nomHopital = "RESIDENCE TY CREACH";
+                } else {
+                    $nomHopital = null;
+                }
                 
                 if ($this->hopitalRepo->findOneBy(['nom' => $nomHopital]) != null) {
                     $hopital = $this->hopitalRepo->findOneBy(['nom' => $nomHopital]);

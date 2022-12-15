@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit SearchData{% endblock %}
+
+{% block body %}
+    <h1>Edit SearchData</h1>
+
+    {{ include('search_data/_form.html.twig', {'button_label': 'Update'}) }}
+
+    <a href="{{ path('app_search_data_index') }}">back to list</a>
+
+    {{ include('search_data/_delete_form.html.twig') }}
+{% endblock %}

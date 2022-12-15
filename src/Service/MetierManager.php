@@ -10,6 +10,8 @@ use Doctrine\Persistence\ManagerRegistry;
 
 class MetierManager
 {
+    private $ldap;
+    private $connectLdapService;
     private $doctrine;
     private $metierRepo;
     private $peopleRecordRepo;
@@ -18,9 +20,11 @@ class MetierManager
      * Constructeur
      * Injection de ConnectLdapService
      */
-    public function __construct(ManagerRegistry $doctrine,
+    public function __construct(ConnectLdapService $connectLdapService, 
+                                ManagerRegistry $doctrine,
                                 MetierRepository $metierRepo,
                                 PeopleRecordRepository $peopleRecordRepo) {
+        $this->connectLdapService = $connectLdapService;
         $this->doctrine = $doctrine;
         $this->metierRepo = $metierRepo;
         $this->peopleRecordRepo = $peopleRecordRepo;

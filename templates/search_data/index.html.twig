@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}SearchData index{% endblock %}
+
+{% block body %}
+    <h1>SearchData index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for search_datum in search_datas %}
+            <tr>
+                <td>{{ search_datum.id }}</td>
+                <td>
+                    <a href="{{ path('app_search_data_show', {'id': search_datum.id}) }}">show</a>
+                    <a href="{{ path('app_search_data_edit', {'id': search_datum.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="2">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_search_data_new') }}">Create new</a>
+{% endblock %}

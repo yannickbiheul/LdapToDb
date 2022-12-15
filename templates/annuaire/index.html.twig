@@ -1,0 +1,80 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}L'annuaire du CHIC{% endblock %}
+
+{% block body %}
+<style>
+    
+</style>
+
+<div class="container d-flex flex-column justify-content-center align-items-center" style="height: 100vh;">
+    <div class="row">
+        <div class="col titre">
+            <h1>L'annuaire du CHIC</h1>
+        </div>
+    </div>
+    <div class="row">
+        {{ form_start(search_form) }}
+        <div class="form">
+            <div class="mb-3 d-flex align-items-center formulaire">
+                {{ form_widget(search_form.name) }}
+                {# <input type="text" name="request" class="recherche" style="width: 400px; height: 38px; margin-right: 4px;"> #}
+                <button type="submit" class="btn btn-primary" style="margin-left: 4px;">🔎</button>
+            </div>
+        </div>
+        {{ form_end(search_form) }}
+    </div>
+    <div class="row  d-flex flex-column justify-content-center align-items-center">
+    {% if resultat is defined %}
+    
+        {% for personne in resultat %}
+            {% if personne.hierarchySv != "PATIENTS/CHIC" and personne.numberRecord.private != "LR" %}
+                <div class="card m-3" style="width: 50rem;">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ personne.displayGn }} {{ personne.sn }}</h5>
+                        {% if personne.attr7 is not null %}
+                            <h6 class="card-subtitle mb-2 text-muted">{{ personne.attr7 }}</h6>
+                        {% endif %}
+                        <p class="card-text">
+                            <ul>
+                                {% if personne.attr5 is not null %}
+                                    
+                                    <li>Hôpital : <strong>{{ personne.attr5 }}</strong></li>
+                                {% endif %}
+                                {% if personne.attr6 is not null %}
+                                    <li>Bâtiment : <strong>{{ personne.attr6 }}</strong></li>
+                                {% endif %}
+                                {% if personne.attr1 is not null %}
+                                    <li>Pôle : <strong>{{ personne.attr1 }}</strong></li>
+                                {% endif %}
+                            </ul>
+                            {% if personne.mail is not null %}
+                                <span class="card-link" style="color: #000;"><i class="fa-solid fa-at"></i></span>
+                                <strong style="margin-left: 16px;">{{ personne.mail }}</strong>
+                            {% endif %}
+                        </p>
+                        {% if personne.mainLineNumber is not null %}
+                            <span class="card-link" style="color: #000;"><i class="fa-solid fa-phone"></i></span>
+                            <span class="card-link"><strong>{{ personne.mainLineNumber }}</strong></span>
+                        {% endif %}
+                        {% if personne.didNumbers is not null %}
+                            <span class="card-link">{{ personne.didNumbers }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        {% endfor %}
+
+    {% endif %}
+    </div>
+    
+</div>
+
+<style>
+.card {
+    box-shadow: 2px 2px 5px #000;
+}
+</style>
+
+
+{% endblock %}

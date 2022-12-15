@@ -24,9 +24,13 @@ class Metier
     #[ORM\OneToMany(mappedBy: 'metier', targetEntity: Personne::class)]
     private Collection $personnes;
 
+    #[ORM\ManyToMany(targetEntity: Batiment::class, inversedBy: 'metiers')]
+    private Collection $batiments;
+
     public function __construct()
     {
         $this->personnes = new ArrayCollection();
+        $this->batiments = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -72,6 +76,30 @@ class Metier
                 $personne->setMetier(null);
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Batiment>
+     */
+    public function getBatiments(): Collection
+    {
+        return $this->batiments;
+    }
+
+    public function addBatiment(Batiment $batiment): self
+    {
+        if (!$this->batiments->contains($batiment)) {
+            $this->batiments->add($batiment);
+        }
+
+        return $this;
+    }
+
+    public function removeBatiment(Batiment $batiment): self
+    {
+        $this->batiments->removeElement($batiment);
 
         return $this;
     }

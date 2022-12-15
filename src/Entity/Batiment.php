@@ -35,11 +35,15 @@ class Batiment
     #[ORM\OneToMany(mappedBy: 'batiment', targetEntity: Service::class)]
     private Collection $services;
 
+    #[ORM\ManyToMany(targetEntity: Metier::class, mappedBy: 'batiments')]
+    private Collection $metiers;
+
     public function __construct()
     {
         $this->poles = new ArrayCollection();
         $this->personnes = new ArrayCollection();
         $this->services = new ArrayCollection();
+        $this->metiers = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -156,6 +160,33 @@ class Batiment
             if ($service->getBatiment() === $this) {
                 $service->setBatiment(null);
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Metier>
+     */
+    public function getMetiers(): Collection
+    {
+        return $this->metiers;
+    }
+
+    public function addMetier(Metier $metier): self
+    {
+        if (!$this->metiers->contains($metier)) {
+            $this->metiers->add($metier);
+            $metier->addBatiment($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMetier(Metier $metier): self
+    {
+        if ($this->metiers->removeElement($metier)) {
+            $metier->removeBatiment($this);
         }
 
         return $this;

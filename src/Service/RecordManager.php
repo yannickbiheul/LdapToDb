@@ -5,11 +5,12 @@ namespace App\Service;
 use App\Entity\Contact;
 use App\Entity\NumberRecord;
 use App\Entity\PeopleRecord;
-use App\Repository\ContactRepository;
+use App\Entity\ContactRecord;
 use App\Service\ConnectLdapService;
 use Doctrine\Persistence\ManagerRegistry;
 use App\Repository\NumberRecordRepository;
 use App\Repository\PeopleRecordRepository;
+use App\Repository\ContactRecordRepository;
 
 /**
  * Récupère toutes les données de l'annuaire, 
@@ -18,11 +19,12 @@ use App\Repository\PeopleRecordRepository;
  */
 class RecordManager
 {
+    private $ldap;
     private $connectLdapService;
     private $doctrine;
     private $numberRecordRepository;
     private $peopleRecordRepository;
-    private $contactRepository;
+    private $contactRecordRepository;
 
     /**
      * Constructeur
@@ -32,17 +34,17 @@ class RecordManager
                                 ManagerRegistry $doctrine,
                                 NumberRecordRepository $numberRecordRepository,
                                 PeopleRecordRepository $peopleRecordRepository,
-                                ContactRepository $contactRepository) {
+                                ContactRecordRepository $contactRecordRepository) {
         $this->connectLdapService = $connectLdapService;
         $this->doctrine = $doctrine;
         $this->numberRecordRepository = $numberRecordRepository;
         $this->peopleRecordRepository = $peopleRecordRepository;
-        $this->contactRepository = $contactRepository;
+        $this->contactRecordRepository = $contactRecordRepository;
     }
 
     /**
      * Liste toutes les entrées du Ldap de l'objectClass "contactRecord"
-     * Retourne tableau de tableau "listContactRecords"
+     * Retourne tableau de tableaux "listContactRecords"
      */
     public function listContactRecord() {
         // Connexion au Ldap
@@ -60,27 +62,30 @@ class RecordManager
     }
 
     /**
-     * Enregistre toutes les entrées du Ldap de l'objectClass "contactRecord" 
+     * Transforme toutes les entrées du Ldap de l'objectClass "contactRecord" en objet "ContactRecord".
+     * Enregistre ces objets si ils ne sont pas présents dans la base de données.
      * 
      */
-    public function enregistrerContact() {
+    public function enregistrerContactRecord() {
+        // Récupérer la liste de contactRecord et le manager
         $listContactRecord = $this->listContactRecord();
         $entityManager = $this->doctrine->getManager();
 
-        // Contact RECORD
+        // Parcourir la liste contactRecords
         for ($i=0; $i < count($listContactRecord)-1; $i++) { 
-            if ($listContactRecord[$i]['private'][0] != 'LR') {
-                // création d'un objet
-                $contact = new Contact();
-                // NOM
-                $contact->setNom($listContactRecord[$i]['sn'][0]);
-                // TELEPHONE
-                $contact->setTelephone($listContactRecord[$i]['phonenumber'][0]);
-                // Vérifier qu'il n'existe pas dans la base de données
-                $exist = $this->contactRepository->findOneBy(['nom' => $contact->getNom()]);
-                if ($exist == null) {
-                    $entityManager->persist($contact);
-                }
+            // création d'un objet
+            $contactRecord = new ContactRecord();
+            // Attribution du nom
+            $contactRecord->setNom($listContactRecord[$i]['sn'][0]);
+            // Attribution du numéro de téléphone
+            $contactRecord->setTelephone($listContactRecord[$i]['phonenumber'][0]);
+            // Attribution du private
+            $contactRecord->setPrivate($listContactRecord[$i]['private'][0]);
+
+            // Vérifier que le contactRecord n'existe pas dans la base de données
+            $exist = $this->contactRecordRepository->findOneBy(['telephone' => $contactRecord->getTelephone()]);
+            if ($exist == null) {
+                $entityManager->persist($contactRecord);
             }
         }
 
@@ -89,7 +94,7 @@ class RecordManager
 
     /**
      * Liste toutes les entrées du Ldap de l'objectClass "numberRecord"
-     * Retourne tableau de tableau "listNumberRecords"
+     * Retourne tableau de tableaux "listNumberRecords"
      */
     public function listNumberRecord() {
         // Connexion au Ldap
@@ -107,16 +112,16 @@ class RecordManager
     }
 
     /**
-     * Enregistre toutes les entrées du Ldap de l'objectClass "peopleRecord" 
+     * Enregistre toutes les entrées du Ldap de l'objectClass "numberRecord" 
      * 
      */
-    public function enregistrerNumber() {
+    public function enregistrerNumberRecord() {
+        // Récupérer la liste numberRecord et le manager
         $listNumberRecord = $this->listNumberRecord();
         $entityManager = $this->doctrine->getManager();
 
-        // NUMBER RECORD
+        // Parcourir la liste numberRecord
         for ($i=0; $i < count($listNumberRecord)-1; $i++) { 
-
             // création d'un objet
             $numberRecord = new NumberRecord();
             // PHONE NUMBER
@@ -164,7 +169,7 @@ class RecordManager
      * Enregistre toutes les entrées du Ldap de l'objectClass "peopleRecord"
      * Transforme ces entrées en objets 
     */
-    public function enregistrerPeople() {
+    public function enregistrerPeopleRecord() {
         $listPeopleRecord = $this->listPeopleRecord();
         $entityManager = $this->doctrine->getManager();
 
@@ -174,7 +179,7 @@ class RecordManager
             $peopleRecord = new PeopleRecord();
 
             // SN
-            $peopleRecord->setSn($listPeopleRecord[$i]['sn'][0]);
+            $peopleRecord->setSn(strtoupper($listPeopleRecord[$i]['sn'][0]));
             // DISPLAY GN
             if ($listPeopleRecord[$i]['displaygn'][0] != " " && $listPeopleRecord[$i]['displaygn'][0] != null) {
                 $peopleRecord->setDisplayGn($listPeopleRecord[$i]['displaygn'][0]);
@@ -229,6 +234,15 @@ class RecordManager
             // CLE UID
             $peopleRecord->setCleUid($listPeopleRecord[$i]['cleuid'][0]);
 
+            // NUMBER RECORD
+            if ($peopleRecord->getMainLineNumber() != null) {
+                $numberRecord = $this->numberRecordRepository->findOneBy(['phoneNumber' => $peopleRecord->getMainLineNumber()]);
+                $peopleRecord->setNumberRecord($numberRecord);
+            } else {
+                $numberRecord = $this->numberRecordRepository->findOneBy(['didNumber' => $peopleRecord->getDidNumbers()]);
+                $peopleRecord->setNumberRecord($numberRecord);
+            }
+
             // Vérifier qu'il n'existe pas dans la base de données
             $exist = $this->peopleRecordRepository->findOneBy(['cleUid' => $peopleRecord->getCleUid()]);
             if ($exist == null) {
@@ -243,13 +257,9 @@ class RecordManager
      * Enregistre tout
      */
     public function enregistrerTout() {
-        $this->enregistrerNumber();
-        $this->enregistrerPeople();
-        $this->enregistrerContact();
-    }
-
-    public function getNumbersGreenList() {
-        return $this->numberRecord->findGreenList();
+        $this->enregistrerContactRecord();
+        $this->enregistrerNumberRecord();
+        $this->enregistrerPeopleRecord();
     }
 
 }

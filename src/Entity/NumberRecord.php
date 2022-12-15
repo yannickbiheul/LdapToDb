@@ -24,6 +24,14 @@ class NumberRecord
     #[ORM\Column(length: 255)]
     private ?string $private = null;
 
+    #[ORM\OneToMany(mappedBy: 'numberRecord', targetEntity: PeopleRecord::class)]
+    private Collection $peopleRecords;
+
+    public function __construct()
+    {
+        $this->peopleRecords = new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -68,6 +76,36 @@ class NumberRecord
     public function setPrivate(string $private): self
     {
         $this->private = $private;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, PeopleRecord>
+     */
+    public function getPeopleRecords(): Collection
+    {
+        return $this->peopleRecords;
+    }
+
+    public function addPeopleRecord(PeopleRecord $peopleRecord): self
+    {
+        if (!$this->peopleRecords->contains($peopleRecord)) {
+            $this->peopleRecords->add($peopleRecord);
+            $peopleRecord->setNumberRecord($this);
+        }
+
+        return $this;
+    }
+
+    public function removePeopleRecord(PeopleRecord $peopleRecord): self
+    {
+        if ($this->peopleRecords->removeElement($peopleRecord)) {
+            // set the owning side to null (unless already changed)
+            if ($peopleRecord->getNumberRecord() === $this) {
+                $peopleRecord->setNumberRecord(null);
+            }
+        }
 
         return $this;
     }

@@ -1,0 +1,17 @@
+body {
+    /* background-image: linear-gradient(to left, #fff1eb 0%, #ace0f9 100%); */
+    /* background-image: linear-gradient(to top, #accbee 0%, #e7f0fd 100%); */
+    background-image: linear-gradient(to top, #e6e9f0 0%, #eef1f5 100%);
+}
+
+.titre {
+    margin-bottom: 20px;
+}
+
+.formulaire > input {
+    width: 400px;
+    height: 38px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    outline: none;
+}

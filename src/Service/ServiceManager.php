@@ -17,6 +17,8 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class ServiceManager
 {
+    private $ldap;
+    private $connectLdapService;
     private $doctrine;
     private $serviceRepo;
     private $poleRepo;
@@ -29,13 +31,15 @@ class ServiceManager
      * Constructeur
      * Injection de ConnectLdapService
      */
-    public function __construct(ManagerRegistry $doctrine, 
+    public function __construct(ConnectLdapService $connectLdapService, 
+                                ManagerRegistry $doctrine, 
                                 ServiceRepository $serviceRepo,
                                 PoleRepository $poleRepo,
                                 BatimentRepository $batimentRepo,
                                 HopitalRepository $hopitalRepo,
                                 PeopleRecordRepository $peopleRecordRepo,
                                 NumberRecordRepository $numberRecordRepo) {
+        $this->connectLdapService = $connectLdapService;
         $this->doctrine = $doctrine;
         $this->serviceRepo = $serviceRepo;
         $this->poleRepo = $poleRepo;

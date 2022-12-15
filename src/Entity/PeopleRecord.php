@@ -48,6 +48,10 @@ class PeopleRecord
     #[ORM\Column(length: 255)]
     private ?string $cleUid = null;
 
+    #[ORM\ManyToOne(inversedBy: 'peopleRecords')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?NumberRecord $numberRecord = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -181,6 +185,18 @@ class PeopleRecord
     public function setCleUid(string $cleUid): self
     {
         $this->cleUid = $cleUid;
+
+        return $this;
+    }
+
+    public function getNumberRecord(): ?NumberRecord
+    {
+        return $this->numberRecord;
+    }
+
+    public function setNumberRecord(?NumberRecord $numberRecord): self
+    {
+        $this->numberRecord = $numberRecord;
 
         return $this;
     }
