@@ -200,4 +200,9 @@ class PeopleRecord
 
         return $this;
     }
+
+    public function __toString(): string
+    {
+        return $this->getDisplayGn() . ' ' . $this->getSn();
+    }
 }

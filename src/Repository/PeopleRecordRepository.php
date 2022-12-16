@@ -49,20 +49,26 @@ class PeopleRecordRepository extends ServiceEntityRepository
                     ;
     }
 
-//    /**
-//     * @return PeopleRecord[] Returns an array of PeopleRecord objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('e')
-//            ->andWhere('e.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('e.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+   /**
+    * @return PeopleRecord[] Returns an array of PeopleRecord objects
+    */
+   public function findByFirstnameAndLastname($firstname, $lastname): array
+   {
+        $qb = $this->createQueryBuilder('p');
+        $qb->select();
+
+        return $qb->getResult();
+
+    //    return $this->createQueryBuilder('e')
+    //        ->select('hierarchysv', )
+    //        ->andWhere('e.exampleField = :val')
+    //        ->setParameter('val', $value)
+    //        ->orderBy('e.id', 'ASC')
+    //        ->setMaxResults(10)
+    //        ->getQuery()
+    //        ->getResult()
+    //    ;
+   }
 
 //    public function findOneBySomeField($value): ?PeopleRecord
 //    {

@@ -26,8 +26,11 @@ class AnnuaireController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $requete = strtoupper($form->getData()->getName());
-            $resultat = $peopleRecordRepository->findBy(['sn' => $requete],['displayGn' => 'ASC']);
+            $requeteComplete = explode(' ', $form->getData()->getName(), 2);
+            $requetePrenom = $requeteComplete[0];
+            $requeteNom = $requeteComplete[1];
+            // $requete = strtoupper($form->getData()->getName());
+            $resultat = $peopleRecordRepository->findBy(['sn' => $requeteNom, 'displayGn' => $requetePrenom],['displayGn' => 'ASC']);
 
             return $this->render('annuaire/index.html.twig', [
                 'controller_name' => 'AnnuaireController',

@@ -15,7 +15,7 @@ use Symfony\Component\Console\Output\OutputInterface;
     hidden: false,
     aliases: ['app:command-main']
 )]
-class RecupererDonneesComand extends Command
+class RecupererDonneesCommand extends Command
 {
     private RecordManager $recordManager;
 
