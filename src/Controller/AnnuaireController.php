@@ -21,17 +21,23 @@ class AnnuaireController extends AbstractController
     #[Route('/', name: 'app_annuaire')]
     public function index(Request $request, PeopleRecordRepository $peopleRecordRepository): Response
     {
+        // Créer une instance de SearchData ainsi que son formulaire
         $searchData = new SearchData();
         $form = $this->createForm(SearchDataType::class, $searchData);
         $form->handleRequest($request);
 
+        // Si le formulaire est soumis et valide
         if ($form->isSubmitted() && $form->isValid()) {
+            // "Découpage de la valeur envoyée depuis le formulaire en 2 parties
             $requeteComplete = explode(' ', $form->getData()->getName(), 2);
+            // La 1ère partie pour le prénom
             $requetePrenom = $requeteComplete[0];
+            // La 2ème partie pour le nom
             $requeteNom = $requeteComplete[1];
-            // $requete = strtoupper($form->getData()->getName());
+            // Recherche par le repo en donnant le prénom et le nom
             $resultat = $peopleRecordRepository->findBy(['sn' => $requeteNom, 'displayGn' => $requetePrenom],['displayGn' => 'ASC']);
 
+            // Retour sur la page avec les résultats
             return $this->render('annuaire/index.html.twig', [
                 'controller_name' => 'AnnuaireController',
                 'search_form' => $form->createView(),
@@ -39,6 +45,7 @@ class AnnuaireController extends AbstractController
             ]);
         }
 
+        // Si le formulaire n'est pas soumis
         return $this->render('annuaire/index.html.twig', [
             'controller_name' => 'AnnuaireController',
             'search_form' => $form->createView(),

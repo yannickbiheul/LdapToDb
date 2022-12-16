@@ -38,7 +38,6 @@
                         <p class="card-text">
                             <ul>
                                 {% if personne.attr5 is not null %}
-                                    
                                     <li>Hôpital : <strong>{{ personne.attr5 }}</strong></li>
                                 {% endif %}
                                 {% if personne.attr6 is not null %}
@@ -69,12 +68,5 @@
     </div>
     
 </div>
-
-<style>
-.card {
-    box-shadow: 2px 2px 5px #000;
-}
-</style>
-
 
 {% endblock %}

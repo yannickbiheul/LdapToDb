@@ -54,8 +54,10 @@ class PeopleRecordRepository extends ServiceEntityRepository
     */
    public function findByFirstnameAndLastname($firstname, $lastname): array
    {
-        $qb = $this->createQueryBuilder('p');
-        $qb->select();
+        $qb = $this->createQueryBuilder('p','n');
+        $qb->select('p.sn', 'p.displayGn', 'p.mainLineNumber', 'p.didNumbers', 'p.mail', 'p.hierarchySv', 'p.attr1', 'p.attr5', 'p.attr6', 'p.attr7', 'n.private')
+            ->from('peopleRecord', 'p')
+            ->innerJoin('numberRecord', 'n');
 
         return $qb->getResult();
 
