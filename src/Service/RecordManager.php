@@ -173,81 +173,89 @@ class RecordManager
         $listPeopleRecord = $this->listPeopleRecord();
         $entityManager = $this->doctrine->getManager();
 
-        // PEOPLE RECORD
+        // Parcourir la liste PEOPLE RECORD
         for ($i=0; $i < count($listPeopleRecord)-1; $i++) { 
-            // création d'un objet
-            $peopleRecord = new PeopleRecord();
+            // Si le numéro n'est pas un numéro de chambre
+            if ($listPeopleRecord[$i]['hierarchysv'][0] != 'PATIENTS/CHIC') {
+                // création d'un objet
+                $peopleRecord = new PeopleRecord();
 
-            // SN
-            $peopleRecord->setSn(strtoupper($listPeopleRecord[$i]['sn'][0]));
-            // DISPLAY GN
-            if ($listPeopleRecord[$i]['displaygn'][0] != " " && $listPeopleRecord[$i]['displaygn'][0] != null) {
-                $peopleRecord->setDisplayGn($listPeopleRecord[$i]['displaygn'][0]);
-            } else {
-                $peopleRecord->setDisplayGn(null);
-            }
-            // MAIN LINE NUMBER
-            if (array_key_exists('mainlinenumber', $listPeopleRecord[$i])) {
-                $peopleRecord->setMainLineNumber($listPeopleRecord[$i]['mainlinenumber'][0]);
-            } else {
-                $peopleRecord->setMainLineNumber(null);
-            }
-            // DID NUMBERS
-            if (array_key_exists('didnumbers', $listPeopleRecord[$i])) {
-                $peopleRecord->setDidNumbers($listPeopleRecord[$i]['didnumbers'][0]);
-            } else {
-                $peopleRecord->setDidNumbers(null);
-            }
-            // MAIL
-            if (array_key_exists('mail', $listPeopleRecord[$i])) {
-                $peopleRecord->setMail($listPeopleRecord[$i]['mail'][0]);
-            } else {
-                $peopleRecord->setMail(null);
-            }
-            // HIERARCHY SV
-            $peopleRecord->setHierarchySV($listPeopleRecord[$i]['hierarchysv'][0]);
-            // ATTR 1
-            if (array_key_exists('attr1', $listPeopleRecord[$i])) {
-                $peopleRecord->setAttr1($listPeopleRecord[$i]['attr1'][0]);
-            } else {
-                $peopleRecord->setAttr1(null);
-            }
-            // ATTR 5
-            if (array_key_exists('attr5', $listPeopleRecord[$i])) {
-                $peopleRecord->setAttr5($listPeopleRecord[$i]['attr5'][0]);
-            } else {
-                $peopleRecord->setAttr5(null);
-            }
-            // ATTR 6
-            if (array_key_exists('attr6', $listPeopleRecord[$i])) {
-                $peopleRecord->setAttr6($listPeopleRecord[$i]['attr6'][0]);
-            } else {
-                $peopleRecord->setAttr6(null);
-            }
-            // ATTR 7
-            if (array_key_exists('attr7', $listPeopleRecord[$i])) {
-                $peopleRecord->setAttr7($listPeopleRecord[$i]['attr7'][0]);
-            } else {
-                $peopleRecord->setAttr7(null);
-            }
+                // SN
+                $peopleRecord->setSn(strtoupper($listPeopleRecord[$i]['sn'][0]));
+                // DISPLAY GN
+                if ($listPeopleRecord[$i]['displaygn'][0] != " " && $listPeopleRecord[$i]['displaygn'][0] != null) {
+                    $peopleRecord->setDisplayGn($listPeopleRecord[$i]['displaygn'][0]);
+                } else {
+                    $peopleRecord->setDisplayGn(null);
+                }
+                // MAIN LINE NUMBER
+                if (array_key_exists('mainlinenumber', $listPeopleRecord[$i])) {
+                    $peopleRecord->setMainLineNumber($listPeopleRecord[$i]['mainlinenumber'][0]);
+                } else {
+                    $peopleRecord->setMainLineNumber(null);
+                }
+                // DID NUMBERS
+                if (array_key_exists('didnumbers', $listPeopleRecord[$i])) {
+                    $peopleRecord->setDidNumbers($listPeopleRecord[$i]['didnumbers'][0]);
+                } else {
+                    $peopleRecord->setDidNumbers(null);
+                }
+                // MAIL
+                if (array_key_exists('mail', $listPeopleRecord[$i])) {
+                    $peopleRecord->setMail($listPeopleRecord[$i]['mail'][0]);
+                } else {
+                    $peopleRecord->setMail(null);
+                }
+                // HIERARCHY SV
+                $peopleRecord->setHierarchySV($listPeopleRecord[$i]['hierarchysv'][0]);
+                // ATTR 1
+                if (array_key_exists('attr1', $listPeopleRecord[$i])) {
+                    $peopleRecord->setAttr1($listPeopleRecord[$i]['attr1'][0]);
+                } else {
+                    $peopleRecord->setAttr1(null);
+                }
+                // ATTR 5
+                if (array_key_exists('attr5', $listPeopleRecord[$i])) {
+                    $peopleRecord->setAttr5($listPeopleRecord[$i]['attr5'][0]);
+                } else {
+                    $peopleRecord->setAttr5(null);
+                }
+                // ATTR 6
+                if (array_key_exists('attr6', $listPeopleRecord[$i])) {
+                    $peopleRecord->setAttr6($listPeopleRecord[$i]['attr6'][0]);
+                } else {
+                    $peopleRecord->setAttr6(null);
+                }
+                // ATTR 7
+                if (array_key_exists('attr7', $listPeopleRecord[$i])) {
+                    $peopleRecord->setAttr7($listPeopleRecord[$i]['attr7'][0]);
+                } else {
+                    $peopleRecord->setAttr7(null);
+                }
 
-            // CLE UID
-            $peopleRecord->setCleUid($listPeopleRecord[$i]['cleuid'][0]);
+                // CLE UID
+                $peopleRecord->setCleUid($listPeopleRecord[$i]['cleuid'][0]);
 
-            // NUMBER RECORD
-            if ($peopleRecord->getMainLineNumber() != null) {
-                $numberRecord = $this->numberRecordRepository->findOneBy(['phoneNumber' => $peopleRecord->getMainLineNumber()]);
-                $peopleRecord->setNumberRecord($numberRecord);
-            } else {
-                $numberRecord = $this->numberRecordRepository->findOneBy(['didNumber' => $peopleRecord->getDidNumbers()]);
-                $peopleRecord->setNumberRecord($numberRecord);
-            }
+                // NUMBER RECORD
+                if ($peopleRecord->getMainLineNumber() != null) {
+                    $numberRecord = $this->numberRecordRepository->findOneBy(['phoneNumber' => $peopleRecord->getMainLineNumber()]);
+                    if ($numberRecord->getPrivate() != 'LR') {
+                        $peopleRecord->setNumberRecord($numberRecord);
+                    } 
+                } else {
+                    $numberRecord = $this->numberRecordRepository->findOneBy(['didNumber' => $peopleRecord->getDidNumbers()]);
+                    if ($numberRecord->getPrivate() != 'LR') {
+                        $peopleRecord->setNumberRecord($numberRecord);
+                    } 
+                }
 
-            // Vérifier qu'il n'existe pas dans la base de données
-            $exist = $this->peopleRecordRepository->findOneBy(['cleUid' => $peopleRecord->getCleUid()]);
-            if ($exist == null) {
-                $entityManager->persist($peopleRecord);
+                // Vérifier qu'il n'existe pas dans la base de données
+                $exist = $this->peopleRecordRepository->findOneBy(['cleUid' => $peopleRecord->getCleUid()]);
+                if ($exist == null) {
+                    $entityManager->persist($peopleRecord);
+                }
             }
+            
         }
         
         $entityManager->flush();
