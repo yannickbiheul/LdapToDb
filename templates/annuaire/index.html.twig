@@ -14,15 +14,7 @@
         </div>
     </div>
     <div class="row">
-        {{ form_start(search_form) }}
-        <div class="form">
-            <div class="mb-3 d-flex align-items-center formulaire">
-                {{ form_widget(search_form.name) }}
-                {# <input type="text" name="request" class="recherche" style="width: 400px; height: 38px; margin-right: 4px;"> #}
-                <button type="submit" class="btn btn-primary" style="margin-left: 4px;"><i class="fa-solid fa-magnifying-glass"></i></button>
-            </div>
-        </div>
-        {{ form_end(search_form) }}
+        
     </div>
     <div class="row  d-flex flex-column justify-content-center align-items-center">
     {% if resultat is defined %}

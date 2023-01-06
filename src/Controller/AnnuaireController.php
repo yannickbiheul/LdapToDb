@@ -26,6 +26,11 @@ class AnnuaireController extends AbstractController
         $form = $this->createForm(SearchDataType::class, $searchData);
         $form->handleRequest($request);
 
+        // Si le formulaire n'est pas soumis
+        return $this->render('annuaire/index.html.twig', [
+            'controller_name' => 'AnnuaireController',
+        ]);
+
         // Si le formulaire est soumis et valide
         if ($form->isSubmitted() && $form->isValid()) {
             // "Découpage de la valeur envoyée depuis le formulaire en 2 parties
@@ -45,10 +50,5 @@ class AnnuaireController extends AbstractController
             ]);
         }
 
-        // Si le formulaire n'est pas soumis
-        return $this->render('annuaire/index.html.twig', [
-            'controller_name' => 'AnnuaireController',
-            'search_form' => $form->createView(),
-        ]);
     }
 }

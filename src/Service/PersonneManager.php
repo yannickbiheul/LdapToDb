@@ -3,16 +3,10 @@
 namespace App\Service;
 
 use App\Entity\Entree;
-use App\Entity\Metier;
 use App\Entity\Personne;
 use App\Entity\PeopleRecord;
-use App\Repository\PoleRepository;
 use App\Service\ConnectLdapService;
 use App\Repository\EntreeRepository;
-use App\Repository\MetierRepository;
-use App\Repository\HopitalRepository;
-use App\Repository\ServiceRepository;
-use App\Repository\BatimentRepository;
 use App\Repository\NumberRecordRepository;
 use App\Repository\PersonneRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -26,13 +20,8 @@ class PersonneManager
 {
     private $ldap;
     private $connectLdapService;
-    private $metierRepo;
     private $doctrine;
     private $personneRepo;
-    private $hopitalRepo;
-    private $poleRepo;
-    private $batimentRepo;
-    private $serviceRepo;
     private $peopleRecordRepo;
     private $numberRecordRepo;
 
@@ -41,23 +30,13 @@ class PersonneManager
      * Injection de ConnectLdapService
      */
     public function __construct(ConnectLdapService $connectLdapService,
-                                MetierRepository $metierRepo,
                                 ManagerRegistry $doctrine,
                                 PersonneRepository $personneRepo,
-                                HopitalRepository $hopitalRepo,
-                                PoleRepository $poleRepo,
-                                BatimentRepository $batimentRepo,
-                                ServiceRepository $serviceRepo,
                                 PeopleRecordRepository $peopleRecordRepo,
                                 NumberRecordRepository $numberRecordRepo) {
         $this->connectLdapService = $connectLdapService;
-        $this->metierRepo = $metierRepo;
         $this->doctrine = $doctrine;
         $this->personneRepo = $personneRepo;
-        $this->hopitalRepo = $hopitalRepo;
-        $this->poleRepo = $poleRepo;
-        $this->batimentRepo = $batimentRepo;
-        $this->serviceRepo = $serviceRepo;
         $this->peopleRecordRepo = $peopleRecordRepo;
         $this->numberRecordRepo = $numberRecordRepo;
     }
