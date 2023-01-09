@@ -31,7 +31,7 @@ class TestController extends AbstractController
     public function index(): Response
     {
         // $this->recordManager->enregistrerNumberRecord();
-        $this->recordManager->enregistrerPeopleRecord();
+        $this->recordManager->enregistrerTout();
         
         return $this->json([
             'resultat' => "TOUT VA BIEN !!!",

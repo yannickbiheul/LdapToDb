@@ -12,6 +12,7 @@ use Doctrine\Persistence\ManagerRegistry;
 use App\Repository\NumberRecordRepository;
 use App\Repository\PeopleRecordRepository;
 use App\Repository\ContactRecordRepository;
+use App\Repository\PersonneRepository;
 
 /**
  * Récupère toutes les données de l'annuaire, 
@@ -26,6 +27,7 @@ class RecordManager
     private $numberRecordRepository;
     private $peopleRecordRepository;
     private $contactRecordRepository;
+    private $personneRepository;
 
     /**
      * Constructeur
@@ -35,12 +37,14 @@ class RecordManager
                                 ManagerRegistry $doctrine,
                                 NumberRecordRepository $numberRecordRepository,
                                 PeopleRecordRepository $peopleRecordRepository,
-                                ContactRecordRepository $contactRecordRepository) {
+                                ContactRecordRepository $contactRecordRepository,
+                                PersonneRepository $personneRepository) {
         $this->connectLdapService = $connectLdapService;
         $this->doctrine = $doctrine;
         $this->numberRecordRepository = $numberRecordRepository;
         $this->peopleRecordRepository = $peopleRecordRepository;
         $this->contactRecordRepository = $contactRecordRepository;
+        $this->personneRepository = $personneRepository;
     }
 
     /**
@@ -83,9 +87,9 @@ class RecordManager
             // Attribution du private
             $contactRecord->setPrivate($listContactRecord[$i]['private'][0]);
 
-            // Vérifier que le contactRecord n'existe pas dans la base de données
+            // Vérifier que le contactRecord n'existe pas dans la base de données et qu'il n'est pas en liste rouge
             $exist = $this->contactRecordRepository->findOneBy(['telephone' => $contactRecord->getTelephone()]);
-            if ($exist == null) {
+            if ($exist == null && $contactRecord->getPrivate() != 'LR') {
                 $entityManager->persist($contactRecord);
             }
         }
@@ -203,7 +207,7 @@ class RecordManager
                     $personne->setPrenom($listPeopleRecord[$i]['displaygn'][0]);
                 } else {
                     $peopleRecord->setDisplayGn(null);
-                    $peopleRecord->setPrenom(null);
+                    $personne->setPrenom(null);
                 }
 
                 // MAIN LINE NUMBER
@@ -274,9 +278,15 @@ class RecordManager
 
                 // CLE UID
                 $peopleRecord->setCleUid($listPeopleRecord[$i]['cleuid'][0]);
+                $personne->setCleUid($listPeopleRecord[$i]['cleuid'][0]);
 
                 // Vérifier qu'il n'existe pas dans la base de données
                 $exist = $this->peopleRecordRepository->findOneBy(['cleUid' => $peopleRecord->getCleUid()]);
+                // dd($exist);
+                $personneExist = $this->personneRepository->findOneBy(['cle_uid' => $personne->getCleUid()]);
+                if ($personneExist == null) {
+                    $entityManager->persist($personne);
+                }
                 if ($exist == null) {
                     $entityManager->persist($peopleRecord);
                 }

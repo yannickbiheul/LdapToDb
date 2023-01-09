@@ -44,6 +44,14 @@ class PersonneRepository extends ServiceEntityRepository
 //     */
 //    public function findByExampleField($value): array
 //    {
+        // Requête personnalisée :
+        // $em = $this->getDoctrine()->getEntityManager();
+        // $em->createQuery("SELECT prenom, nom FROM App:Personne WHERE prenom LIKE :val OR nom LIKE :val");
+        // $em->setParameter('val', $value . '%');
+    
+        // return $em->getResult();
+
+        // Query Builder :
 //        return $this->createQueryBuilder('p')
 //            ->andWhere('p.exampleField = :val')
 //            ->setParameter('val', $value)

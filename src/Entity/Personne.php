@@ -15,7 +15,7 @@ class Personne
     #[Groups(["getPersonnes"])]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     #[Groups(["getPersonnes"])]
     private ?string $prenom = null;
 
@@ -51,6 +51,9 @@ class Personne
     #[Groups(["getPersonnes"])]
     private ?string $mail = null;
 
+    #[ORM\Column(length: 255)]
+    private ?string $cle_uid = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -61,7 +64,7 @@ class Personne
         return $this->prenom;
     }
 
-    public function setPrenom(string $prenom): self
+    public function setPrenom(?string $prenom): self
     {
         $this->prenom = $prenom;
 
@@ -160,6 +163,18 @@ class Personne
     public function setBatiment(?string $batiment): self
     {
         $this->batiment = $batiment;
+
+        return $this;
+    }
+
+    public function getCleUid(): ?string
+    {
+        return $this->cle_uid;
+    }
+
+    public function setCleUid(string $cle_uid): self
+    {
+        $this->cle_uid = $cle_uid;
 
         return $this;
     }
