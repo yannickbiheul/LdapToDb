@@ -85,7 +85,7 @@ class Personne
         return $this->tel_court;
     }
 
-    public function setTelCourt(string $tel_court): self
+    public function setTelCourt(?string $tel_court): self
     {
         $this->tel_court = $tel_court;
 
@@ -112,6 +112,54 @@ class Personne
     public function setMail(?string $mail): self
     {
         $this->mail = $mail;
+
+        return $this;
+    }
+
+    public function getMetier(): ?string
+    {
+        return $this->metier;
+    }
+
+    public function setMetier(?string $metier): self
+    {
+        $this->metier = $metier;
+
+        return $this;
+    }
+
+    public function getHopital(): ?string
+    {
+        return $this->hopital;
+    }
+
+    public function setHopital(?string $hopital): self
+    {
+        $this->hopital = $hopital;
+
+        return $this;
+    }
+
+    public function getPole(): ?string
+    {
+        return $this->pole;
+    }
+
+    public function setPole(?string $pole): self
+    {
+        $this->pole = $pole;
+
+        return $this;
+    }
+
+    public function getBatiment(): ?string
+    {
+        return $this->batiment;
+    }
+
+    public function setBatiment(?string $batiment): self
+    {
+        $this->batiment = $batiment;
 
         return $this;
     }
